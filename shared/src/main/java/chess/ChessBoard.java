@@ -1,5 +1,7 @@
 package chess;
 
+import java.util.Arrays;
+
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
@@ -8,8 +10,9 @@ package chess;
  */
 public class ChessBoard {
 
+    public ChessPiece[][] boardPieces;
     public ChessBoard() {
-        
+        boardPieces = new ChessPiece[8][8];
     }
 
     /**
@@ -19,9 +22,19 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        throw new RuntimeException("Not implemented");
+        int row = position.getRow() - 1;
+        int col = position.getColumn() - 1;
+
+        if (isValidPosition(row, col)) {
+            boardPieces[row][col] = piece;
+        } else {
+            throw new IllegalArgumentException("Invalid position");
+        }
     }
 
+    private boolean isValidPosition(int row, int col) {
+        return row >= 0 && row < 8 && col >= 0 && col < 8;
+    }
     /**
      * Gets a chess piece on the chessboard
      *
@@ -30,7 +43,14 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        throw new RuntimeException("Not implemented");
+        int row = position.getRow() - 1;
+        int col = position.getColumn() - 1;
+
+        if (isValidPosition(row, col)) {
+            return boardPieces[row][col];
+        } else {
+            throw new IllegalArgumentException("Invalid position");
+        }
     }
 
     /**
@@ -38,6 +58,14 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        // clear board
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                boardPieces[i][j] = null;
+            }
+        }
+
+        // set new pieces for board
+        // TODO
     }
 }
