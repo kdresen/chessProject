@@ -20,5 +20,7 @@ Differences between Java and C++
 - Java is a hybrid, compiled / interpreted language
 - several other differences
 
+print in java: 
+System.out.println("Hello BYU!");
 
 

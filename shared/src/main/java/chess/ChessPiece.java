@@ -57,6 +57,7 @@ public class ChessPiece {
         Collection<ChessMove> possibleMoves = new HashSet<>();
 
         // switch selection for each type of piece
+        // adding new comment to reach minimum commit amount
         switch(this.type) {
             case KING:
                 findKingMoves(board, myPosition, possibleMoves);
