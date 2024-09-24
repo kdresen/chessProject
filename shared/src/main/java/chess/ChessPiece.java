@@ -373,68 +373,33 @@ public class ChessPiece {
     }
 
     void findPawnMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves) {
-        // one space towards opposite team, optional two if in starting position
-        // diagonal forward if capturing piece
         int col = myPosition.getColumn();
         int row = myPosition.getRow();
 
-        int oneUp = row + 1;
-        int oneDown = row - 1;
-        int oneLeft = col - 1;
-        int oneRight = col + 1;
+        int oneForward = (this.pieceColor == ChessGame.TeamColor.BLACK) ? row - 1 : row + 1;
+        int startRow = (this.pieceColor == ChessGame.TeamColor.BLACK) ? 7 : 2;
 
-        boolean firstMove = false;
-        boolean diagonal = false;
+        boolean teamColor = this.pieceColor == ChessGame.TeamColor.WHITE;
+        boolean firstMove = (row == startRow);
 
-        // check if is in starting position
-        if (this.pieceColor == ChessGame.TeamColor.BLACK) {
-            boolean teamColor = false;
-            // normal move
-            if (oneDown > 0) {
-                ChessPosition newPosition = new ChessPosition(oneDown, col);
-                if (row == 7) {
-                    firstMove = true;
-                }
-                checkNewSpacePawn(board, myPosition, newPosition, possibleMoves, firstMove, teamColor, diagonal);
-
-                // diagonal capture left
-                if (oneLeft > 0) {
-                    diagonal = true;
-                    ChessPosition diagonalLeft = new ChessPosition(oneDown, oneLeft);
-                    checkNewSpacePawn(board, myPosition, diagonalLeft, possibleMoves, firstMove, teamColor, diagonal);
-                }
-                if (oneRight < 9) {
-                    diagonal = true;
-                    ChessPosition diagonalRight = new ChessPosition(oneDown, oneRight);
-                    checkNewSpacePawn(board, myPosition, diagonalRight, possibleMoves, firstMove, teamColor, diagonal);
-                }
-            }
-
-        } else {
-            boolean teamColor = true;
-            // normal move
-            if (oneUp < 9) {
-                ChessPosition newPosition = new ChessPosition(oneUp, col);
-                // include optional 2 square move
-                if (row == 2) {
-                    firstMove = true;
-                }
-                checkNewSpacePawn(board, myPosition, newPosition, possibleMoves, firstMove, teamColor, diagonal);
-
-                // diagonal capture
-                if (oneLeft > 0) {
-                    diagonal = true;
-                    ChessPosition diagonalLeft = new ChessPosition(oneUp, oneLeft);
-                    checkNewSpacePawn(board, myPosition, diagonalLeft, possibleMoves, firstMove, teamColor, diagonal);
-                }
-                if (oneRight < 9) {
-                    diagonal = true;
-                    ChessPosition diagonalRight = new ChessPosition(oneUp, oneRight);
-                    checkNewSpacePawn(board, myPosition, diagonalRight, possibleMoves, firstMove, teamColor, diagonal);
-                }
-            }
-
+        if (isWithinBounds(oneForward)) {
+            ChessPosition forwardPosition = new ChessPosition(oneForward, col);
+            checkNewSpacePawn(board, myPosition, forwardPosition, possibleMoves, firstMove, teamColor, false);
         }
+
+        checkDiagonalCapture(board, myPosition, possibleMoves, oneForward, col - 1, teamColor);
+        checkDiagonalCapture(board, myPosition, possibleMoves, oneForward, col + 1, teamColor);
+    }
+
+    private void checkDiagonalCapture(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves, int newRow, int newCol, boolean teamColor) {
+        if (isWithinBounds(newRow) && isWithinBounds(newCol)) {
+            ChessPosition diagonalPosition = new ChessPosition(newRow, newCol);
+            checkNewSpacePawn(board, myPosition, diagonalPosition, possibleMoves, false, teamColor, true);
+        }
+    }
+
+    private boolean isWithinBounds(int value) {
+        return value > 0 && value < 9;
     }
 
     boolean checkNewSpace(ChessBoard board, ChessPosition myPosition, ChessPosition newPosition, Collection<ChessMove> possibleMoves) {
