@@ -323,54 +323,30 @@ public class ChessPiece {
         int col = myPosition.getColumn();
         int row = myPosition.getRow();
 
-        boolean upEndFound = false;
-        boolean downEndFound = false;
-        boolean rightEndFound = false;
-        boolean leftEndFound = false;
+        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        boolean[] endFound = {false, false, false, false};
 
-        for (int i = 1; i < 9; i++) { // all four directions in one loop
-            int rowUp = row + i;
-            int rowDown = row - i;
-            int columnLeft = col - i;
-            int columnRight = col + i;
+        for (int i = 1; i < 9; i++) {
+            for (int d = 0; d < 4; d++) {
+                if (endFound[d]) continue;
 
-            if (!upEndFound) {
-                if (rowUp < 9) {
-                    ChessPosition upPosition = new ChessPosition(rowUp, col);
-                    upEndFound = checkNewSpace(board, myPosition, upPosition, possibleMoves);
+                int newRow = row + directions[d][0] * i;
+                int newCol = col + directions[d][1] * i;
+
+                if (isWithinBounds(newRow) && isWithinBounds(newCol)) {
+                    ChessPosition newPosition = new ChessPosition(newRow, newCol);
+                    endFound[d] = checkNewSpace(board, myPosition, newPosition, possibleMoves);
                 } else {
-                    upEndFound = true;
+                    endFound[d] = true;
                 }
             }
-            if (!downEndFound) {
-                if (rowDown > 0) {
-                    ChessPosition downPosition = new ChessPosition(rowDown, col);
-                    downEndFound = checkNewSpace(board, myPosition, downPosition, possibleMoves);
-                } else {
-                    downEndFound = true;
-                }
-            }
-            if (!leftEndFound) {
-                if (columnLeft > 0) {
-                    ChessPosition leftPosition = new ChessPosition(row, columnLeft);
-                    leftEndFound = checkNewSpace(board, myPosition, leftPosition, possibleMoves);
-                } else {
-                    leftEndFound = true;
-                }
-            }
-            if (!rightEndFound) {
-                if (columnRight < 9) {
-                    ChessPosition rightPosition = new ChessPosition(row, columnRight);
-                    rightEndFound = checkNewSpace(board, myPosition, rightPosition, possibleMoves);
-                } else {
-                    rightEndFound = true;
-                }
-            }
-            if (upEndFound && downEndFound && rightEndFound && leftEndFound) {
+
+            if (allEndsFound(endFound)) {
                 break;
             }
         }
     }
+
 
     void findPawnMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves) {
         int col = myPosition.getColumn();
@@ -396,6 +372,13 @@ public class ChessPiece {
             ChessPosition diagonalPosition = new ChessPosition(newRow, newCol);
             checkNewSpacePawn(board, myPosition, diagonalPosition, possibleMoves, false, teamColor, true);
         }
+    }
+
+    private boolean allEndsFound(boolean[] endFound) {
+        for (boolean end : endFound) {
+            if (!end) return false;
+        }
+        return true;
     }
 
     private boolean isWithinBounds(int value) {
