@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -18,6 +19,7 @@ public class ChessPiece {
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
+
     }
 
     /**
@@ -436,8 +438,8 @@ public class ChessPiece {
     }
 
     boolean checkNewSpace(ChessBoard board, ChessPosition myPosition, ChessPosition newPosition, Collection<ChessMove> possibleMoves) {
-        if (board.getPiece(newPosition) != null) {
-            ChessPiece foundPiece = board.getPiece(newPosition);
+        ChessPiece foundPiece = board.getPiece(newPosition);
+        if (foundPiece != null) {
             if (foundPiece.getTeamColor() != this.pieceColor) {
                 possibleMoves.add(new ChessMove(myPosition, newPosition, null));
             }
@@ -450,54 +452,42 @@ public class ChessPiece {
     void checkNewSpacePawn(ChessBoard board, ChessPosition myPosition, ChessPosition newPosition,
                            Collection<ChessMove> possibleMoves, boolean firstMove, boolean teamColor, boolean diagonal) {
 
-        if (board.getPiece(newPosition) == null) {
-            if (diagonal) {
-                return;
-            }
-            // check if promoting
-            if (newPosition.getRow() == 1 || newPosition.getRow() == 8) {
-                possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
-                possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
-                possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
-                possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
+        ChessPiece foundPiece = board.getPiece(newPosition);
+
+        if (!diagonal && foundPiece == null) {
+            if (isPromotionRow(newPosition)) {
+                addPromotionMoves(possibleMoves, myPosition, newPosition);
             } else {
                 possibleMoves.add(new ChessMove(myPosition, newPosition, null));
             }
 
-            if (firstMove) { // optional double move
-                if (!teamColor) {
-                    int twoDown = myPosition.getRow() - 2;
-                    int col = myPosition.getColumn();
-                    ChessPosition doubleMove = new ChessPosition(twoDown, col);
-                    if (board.getPiece(doubleMove) == null) {
-                        possibleMoves.add(new ChessMove(myPosition, doubleMove, null));
-                    }
-                } else {
-                    int twoUp = myPosition.getRow() + 2;
-                    int col = myPosition.getColumn();
-                    ChessPosition doubleMove = new ChessPosition(twoUp, col);
-                    if (board.getPiece(doubleMove) == null) {
-                        possibleMoves.add(new ChessMove(myPosition, doubleMove, null));
-                    }
+            if (firstMove) {
+                ChessPosition doubleMove = teamColor
+                        ? new ChessPosition(myPosition.getRow() + 2, myPosition.getColumn())
+                        : new ChessPosition(myPosition.getRow() - 2, myPosition.getColumn());
+                if (board.getPiece(doubleMove) == null) {
+                    possibleMoves.add(new ChessMove(myPosition, doubleMove, null));
                 }
             }
         }
-        // diagonal capture
-        if (diagonal) {
-            ChessPiece foundPiece = board.getPiece(newPosition);
-            if (foundPiece.getTeamColor() != this.pieceColor) {
-                // check if promoting
-                if (newPosition.getRow() == 1 || newPosition.getRow() == 8) {
-                    possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
-                    possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
-                    possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
-                    possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
-                } else {
-                    possibleMoves.add(new ChessMove(myPosition, newPosition, null));
-                }
+        if (diagonal && foundPiece != null && foundPiece.getTeamColor() != this.pieceColor) {
+            if (isPromotionRow(newPosition)) {
+                addPromotionMoves(possibleMoves, myPosition, newPosition);
+            } else {
+                possibleMoves.add(new ChessMove(myPosition, newPosition, null));
+            }
+        }
+    }
 
-            }
-        }
+    private boolean isPromotionRow(ChessPosition position) {
+        return position.getRow() == 1 || position.getRow() == 8;
+    }
+
+    private void addPromotionMoves(Collection<ChessMove> possibleMoves, ChessPosition myPosition, ChessPosition newPosition) {
+        possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.QUEEN));
+        possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
+        possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
+        possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
     }
 
     @Override
