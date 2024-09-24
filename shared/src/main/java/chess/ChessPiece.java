@@ -130,89 +130,29 @@ public class ChessPiece {
         int col = myPosition.getColumn();
         int row = myPosition.getRow();
 
-        // combination of both rook and bishop
-        boolean upEndFound = false;
-        boolean upLeftEndFound = false;
-        boolean upRightEndFound = false;
-        boolean downEndFound = false;
-        boolean downLeftEndFound = false;
-        boolean downRightEndFound = false;
-        boolean leftEndFound = false;
-        boolean rightEndFound = false;
+        int[][] directions = {
+                {1, 0},
+                {-1, 0},
+                {0, 1},
+                {0, -1},
+                {1, 1},
+                {1, -1},
+                {-1, 1},
+                {-1, -1}
+        };
 
-        for ( int i = 1; i < 9; i++) { // all 4 directions in one loop
-            int columnLeft = col - i;
-            int columnRight = col + i;
-            int rowUp = row + i;
-            int rowDown = row - i;
+        for (int[] direction : directions) {
+            boolean endFound = false;
+            for (int i = 1; i < 9 && !endFound; i++) {
+                int newRow = row + direction[0] * i;
+                int newCol = col + direction[1] * i;
 
-            if (!upRightEndFound) {
-                if (columnRight < 9 && rowUp < 9 ) {
-                    ChessPosition upRightPosition = new ChessPosition(rowUp, columnRight);
-                    upRightEndFound = checkNewSpace(board, myPosition, upRightPosition, possibleMoves);
+                if (isWithinBounds(newRow, newCol)) {
+                    ChessPosition newPosition = new ChessPosition(newRow, newCol);
+                    endFound = checkNewSpace(board, myPosition, newPosition, possibleMoves);
                 } else {
-                    upRightEndFound = true;
+                    endFound = true;
                 }
-
-            }
-            if (!upLeftEndFound) {
-                if (columnLeft > 0 && rowUp < 9) {
-                    ChessPosition upLeftPosition = new ChessPosition(rowUp, columnLeft);
-                    upLeftEndFound = checkNewSpace(board, myPosition, upLeftPosition, possibleMoves);
-                } else {
-                    upLeftEndFound = true;
-                }
-            }
-            if (!downRightEndFound) {
-                if (columnRight < 9 && rowDown > 0) {
-                    ChessPosition downRightPosition = new ChessPosition(rowDown, columnRight);
-                    downRightEndFound = checkNewSpace(board, myPosition, downRightPosition, possibleMoves);
-                } else {
-                    downRightEndFound = true;
-                }
-            }
-            if (!downLeftEndFound) {
-                if (columnLeft > 0 && rowDown > 0) {
-                    ChessPosition downLeftPosition = new ChessPosition(rowDown, columnLeft);
-                    downLeftEndFound = checkNewSpace(board, myPosition, downLeftPosition, possibleMoves);
-                } else {
-                    downLeftEndFound = true;
-                }
-            }
-            if (!upEndFound) {
-                if (rowUp < 9) {
-                    ChessPosition upPosition = new ChessPosition(rowUp, col);
-                    upEndFound = checkNewSpace(board, myPosition, upPosition, possibleMoves);
-                } else {
-                    upEndFound = true;
-                }
-            }
-            if (!downEndFound) {
-                if (rowDown > 0) {
-                    ChessPosition downPosition = new ChessPosition(rowDown, col);
-                    downEndFound = checkNewSpace(board, myPosition, downPosition, possibleMoves);
-                } else {
-                    downEndFound = true;
-                }
-            }
-            if (!leftEndFound) {
-                if (columnLeft > 0) {
-                    ChessPosition leftPosition = new ChessPosition(row, columnLeft);
-                    leftEndFound = checkNewSpace(board, myPosition, leftPosition, possibleMoves);
-                } else {
-                    leftEndFound = true;
-                }
-            }
-            if (!rightEndFound) {
-                if (columnRight < 9) {
-                    ChessPosition rightPosition = new ChessPosition(row, columnRight);
-                    rightEndFound = checkNewSpace(board, myPosition, rightPosition, possibleMoves);
-                } else {
-                    rightEndFound = true;
-                }
-            }
-            if (upEndFound && downEndFound && rightEndFound && leftEndFound && upLeftEndFound && upRightEndFound && downLeftEndFound && downRightEndFound) {
-                break;
             }
         }
     }
