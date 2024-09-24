@@ -87,42 +87,25 @@ public class ChessPiece {
         int col = myPosition.getColumn();
         int row = myPosition.getRow();
 
-        int rowUp = row + 1;
-        int rowDown = row - 1;
-        int columnLeft = col - 1;
-        int columnRight = col + 1;
+        int [][] directions = {
+                {1, 0},
+                {-1, 0},
+                {0, 1},
+                {0, -1},
+                {1, 1},
+                {-1, -1},
+                {1, -1},
+                {-1, 1},
+        };
 
-        if (rowUp < 9) {
-            ChessPosition upPosition = new ChessPosition(rowUp, col);
-            checkNewSpace(board, myPosition, upPosition, possibleMoves);
-        }
-        if (rowUp < 9 && columnLeft > 0) {
-            ChessPosition upLeftPosition = new ChessPosition(rowUp, columnLeft);
-            checkNewSpace(board, myPosition, upLeftPosition, possibleMoves);
-        }
-        if (rowUp < 9 && columnRight < 9) {
-            ChessPosition upRightPosition = new ChessPosition(rowUp, columnRight);
-            checkNewSpace(board, myPosition, upRightPosition, possibleMoves);
-        }
-        if (columnLeft > 0) {
-            ChessPosition leftPosition = new ChessPosition(row, columnLeft);
-            checkNewSpace(board, myPosition, leftPosition, possibleMoves);
-        }
-        if (columnRight < 9) {
-            ChessPosition rightPosition = new ChessPosition(row, columnRight);
-            checkNewSpace(board, myPosition, rightPosition, possibleMoves);
-        }
-        if (rowDown > 0) {
-            ChessPosition downPosition = new ChessPosition(rowDown, col);
-            checkNewSpace(board, myPosition, downPosition, possibleMoves);
-        }
-        if (rowDown > 0 && columnLeft > 0) {
-            ChessPosition downLeftPosition = new ChessPosition(rowDown, columnLeft);
-            checkNewSpace(board, myPosition, downLeftPosition, possibleMoves);
-        }
-        if (rowDown > 0 && columnRight < 9) {
-            ChessPosition downRightPosition = new ChessPosition(rowDown, columnRight);
-            checkNewSpace(board, myPosition, downRightPosition, possibleMoves);
+        for (int[] direction : directions) {
+            int newRow = row + direction[0];
+            int newCol = col + direction[1];
+
+            if (isWithinBounds(newRow, newCol)) {
+                ChessPosition newPosition = new ChessPosition(newRow, newCol);
+                checkNewSpace(board, myPosition, newPosition, possibleMoves);
+            }
         }
     }
 
