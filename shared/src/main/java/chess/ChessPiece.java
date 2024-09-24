@@ -275,47 +275,18 @@ public class ChessPiece {
         int col = myPosition.getColumn();
         int row = myPosition.getRow();
 
-        // L shape
-        int twoDown = row - 2;
-        int oneDown = row - 1;
-        int twoUp = row + 2;
-        int oneUp = row + 1;
-        int twoLeft = col - 2;
-        int oneLeft = col - 1;
-        int twoRight = col + 2;
-        int oneRight = col + 1;
+        int[][] knightMoves = {
+                {2, -1}, {2, 1}, {1, -2}, {1, 2}, {-1, -2}, {-1, 2}, {-2, -1}, {-2, 1}
+        };
 
-        if (twoUp < 9 && oneLeft > 0) {
-            ChessPosition newPosition = new ChessPosition(twoUp, oneLeft);
-            checkNewSpace(board, myPosition, newPosition, possibleMoves);
-        }
-        if (twoUp < 9 && oneRight < 9) {
-            ChessPosition newPosition = new ChessPosition(twoUp, oneRight);
-            checkNewSpace(board, myPosition, newPosition, possibleMoves);
-        }
-        if (twoLeft > 0 && oneUp < 9) {
-            ChessPosition newPosition = new ChessPosition(oneUp, twoLeft);
-            checkNewSpace(board, myPosition, newPosition, possibleMoves);
-        }
-        if (twoLeft > 0 && oneDown > 0) {
-            ChessPosition newPosition = new ChessPosition(oneDown, twoLeft);
-            checkNewSpace(board, myPosition, newPosition, possibleMoves);
-        }
-        if (twoRight < 9 && oneUp < 9) {
-            ChessPosition newPosition = new ChessPosition(oneUp, twoRight);
-            checkNewSpace(board, myPosition, newPosition, possibleMoves);
-        }
-        if (twoRight < 9 && oneDown > 0) {
-            ChessPosition newPosition = new ChessPosition(oneDown, twoRight);
-            checkNewSpace(board, myPosition, newPosition, possibleMoves);
-        }
-        if (twoDown > 0 && oneLeft > 0) {
-            ChessPosition newPosition = new ChessPosition(twoDown, oneLeft);
-            checkNewSpace(board, myPosition, newPosition, possibleMoves);
-        }
-        if (twoDown > 0 && oneRight < 9) {
-            ChessPosition newPosition = new ChessPosition(twoDown, oneRight);
-            checkNewSpace(board, myPosition, newPosition, possibleMoves);
+        for (int[] move : knightMoves) {
+            int newRow = row + move[0];
+            int newCol = col + move[1];
+
+            if (isWithinBounds(newRow, newCol)) {
+                ChessPosition newPosition = new ChessPosition(newRow, newCol);
+                checkNewSpace(board, myPosition, newPosition, possibleMoves);
+            }
         }
     }
 
@@ -333,7 +304,7 @@ public class ChessPiece {
                 int newRow = row + directions[d][0] * i;
                 int newCol = col + directions[d][1] * i;
 
-                if (isWithinBounds(newRow) && isWithinBounds(newCol)) {
+                if (isWithinBounds(newRow, newCol)) {
                     ChessPosition newPosition = new ChessPosition(newRow, newCol);
                     endFound[d] = checkNewSpace(board, myPosition, newPosition, possibleMoves);
                 } else {
@@ -358,7 +329,7 @@ public class ChessPiece {
         boolean teamColor = this.pieceColor == ChessGame.TeamColor.WHITE;
         boolean firstMove = (row == startRow);
 
-        if (isWithinBounds(oneForward)) {
+        if (isWithinBounds(oneForward, col)) {
             ChessPosition forwardPosition = new ChessPosition(oneForward, col);
             checkNewSpacePawn(board, myPosition, forwardPosition, possibleMoves, firstMove, teamColor, false);
         }
@@ -368,7 +339,7 @@ public class ChessPiece {
     }
 
     private void checkDiagonalCapture(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves, int newRow, int newCol, boolean teamColor) {
-        if (isWithinBounds(newRow) && isWithinBounds(newCol)) {
+        if (isWithinBounds(newRow, newCol)) {
             ChessPosition diagonalPosition = new ChessPosition(newRow, newCol);
             checkNewSpacePawn(board, myPosition, diagonalPosition, possibleMoves, false, teamColor, true);
         }
@@ -381,8 +352,8 @@ public class ChessPiece {
         return true;
     }
 
-    private boolean isWithinBounds(int value) {
-        return value > 0 && value < 9;
+    private boolean isWithinBounds(int row, int col) {
+        return row > 0 && row < 9 && col > 0 && col < 9;
     }
 
     boolean checkNewSpace(ChessBoard board, ChessPosition myPosition, ChessPosition newPosition, Collection<ChessMove> possibleMoves) {
