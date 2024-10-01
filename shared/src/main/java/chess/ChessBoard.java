@@ -15,6 +15,18 @@ public class ChessBoard {
         boardPieces = new ChessPiece[8][8];
     }
 
+    public ChessBoard copy() {
+        ChessBoard copy = new ChessBoard();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (boardPieces[i][j] != null) {
+                    copy.boardPieces[i][j] = boardPieces[i][j].clone();
+                }
+            }
+        }
+        return copy;
+    }
+
     /**
      * Adds a chess piece to the chessboard
      *

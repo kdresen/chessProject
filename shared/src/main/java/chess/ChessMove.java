@@ -10,8 +10,8 @@ import java.util.Objects;
  */
 public class ChessMove {
 
-    private final ChessPosition startPosition;
-    private final ChessPosition endPosition;
+    private ChessPosition startPosition;
+    private ChessPosition endPosition;
     private final ChessPiece.PieceType promotionPiece;
 
 
@@ -20,6 +20,19 @@ public class ChessMove {
         this.startPosition = startPosition;
         this.endPosition = endPosition;
         this.promotionPiece = promotionPiece;
+    }
+
+    // create a deep copy
+
+    public ChessMove clone() {
+        try {
+            ChessMove copy = (ChessMove) super.clone();
+            copy.startPosition = this.startPosition.clone();
+            copy.endPosition = this.endPosition.clone();
+            return copy;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 
     /**
