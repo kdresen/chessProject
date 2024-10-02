@@ -20,7 +20,7 @@ public class ChessBoard {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 if (boardPieces[i][j] != null) {
-                    copy.boardPieces[i][j] = boardPieces[i][j].clone();
+                    copy.boardPieces[i][j] = boardPieces[i][j].copy();
                 }
             }
         }

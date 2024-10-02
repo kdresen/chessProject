@@ -20,13 +20,15 @@ public class ChessPiece {
         this.type = type;
 
     }
+    public ChessPiece() {}
 
-    public ChessPiece clone() {
-        try {
-            return (ChessPiece) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError();
-        }
+    public ChessPiece copy() {
+        ChessPiece copiedPiece = new ChessPiece();
+
+        copiedPiece.pieceColor = this.pieceColor;
+        copiedPiece.type = this.type;
+
+        return copiedPiece;
     }
 
     /**
