@@ -104,7 +104,6 @@ public class ChessGame {
          ChessPosition startPosition = move.getStartPosition();
          ChessPosition endPosition = move.getEndPosition();
          ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
-         TeamColor currentTeam = getTeamTurn();
 
          ChessPiece currentPiece = currentBoard.getPiece(startPosition);
          if (currentPiece == null) {
