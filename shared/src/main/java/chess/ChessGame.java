@@ -142,9 +142,25 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         boolean checkKing = isInCheck(teamColor);
+        if (checkKing) {
+            for (int row = 1; row <= 8; row++) {
+                for (int col = 1; col <= 8; col++) {
+                    ChessPiece piece = currentBoard.getPiece(row, col);
 
+                    if (piece != null && piece.getTeamColor() == teamColor) {
+                        Collection<ChessMove> currentTeamMoves = validMoves(new ChessPosition(row, col));
 
-        return false;
+                        if (currentTeamMoves == null) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        } else {
+            return false;
+        }
+
+        return true;
     }
 
     /**
