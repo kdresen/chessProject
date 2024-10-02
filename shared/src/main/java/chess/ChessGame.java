@@ -171,9 +171,19 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        // TODO king is not in check but team has no legal moves available
+        boolean checkKing = isInCheck(teamColor);
+        Collection<ChessMove> validMoves = new HashSet<>();
 
-        throw new RuntimeException("Not implemented");
+        for (int row = 1; row <=8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPiece piece = currentBoard.getPiece(row, col);
+
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    validMoves.addAll(validMoves(new ChessPosition(row, col)));
+                }
+            }
+        }
+        return !checkKing && validMoves.isEmpty();
     }
 
     /**
