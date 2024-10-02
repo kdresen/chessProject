@@ -196,7 +196,7 @@ public class ChessGame {
                     if (piece != null && piece.getTeamColor() == teamColor) {
                         Collection<ChessMove> currentTeamMoves = validMoves(new ChessPosition(row, col));
 
-                        if (currentTeamMoves == null) {
+                        if (!currentTeamMoves.isEmpty()) {
                             return false;
                         }
                     }
