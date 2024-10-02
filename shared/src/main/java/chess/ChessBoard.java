@@ -65,6 +65,17 @@ public class ChessBoard {
         }
     }
 
+    public ChessPiece getPiece(int row, int col) {
+        row = row - 1;
+        col = col - 1;
+
+        if (isValidPosition(row, col)) {
+            return boardPieces[row][col];
+        } else {
+            throw new IllegalArgumentException("Invalid position");
+        }
+    }
+
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)

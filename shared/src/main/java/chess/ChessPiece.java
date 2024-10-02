@@ -90,6 +90,35 @@ public class ChessPiece {
         return possibleMoves;
     }
 
+    public Collection<ChessMove> pieceMoves(ChessBoard board, int row, int col) {
+        Collection<ChessMove> possibleMoves = new HashSet<>();
+        ChessPosition myPosition = new ChessPosition(row, col);
+
+        // switch selection for each type of piece
+        // adding new comment to reach minimum commit amount
+        switch(this.type) {
+            case KING:
+                findKingMoves(board, myPosition, possibleMoves);
+                break;
+            case QUEEN:
+                findQueenMoves(board, myPosition, possibleMoves);
+                break;
+            case BISHOP:
+                findBishopMoves(board, myPosition, possibleMoves);
+                break;
+            case KNIGHT:
+                findKnightMoves(board, myPosition, possibleMoves);
+                break;
+            case ROOK:
+                findRookMoves(board, myPosition, possibleMoves);
+                break;
+            default:
+                findPawnMoves(board, myPosition, possibleMoves);
+
+        }
+        return possibleMoves;
+    }
+
     void findKingMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves) {
         int col = myPosition.getColumn();
         int row = myPosition.getRow();
