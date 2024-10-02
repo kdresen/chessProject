@@ -65,26 +65,18 @@ public class ChessGame {
             clonedBoard = currentBoard.copy();
 
             // make the move
-            ChessPosition newPosition = move.getEndPosition();
-            ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
+            ChessPosition endPosition = move.getEndPosition();
+            ChessPiece clonedPiece = clonedBoard.getPiece(startPosition);
 
-            int row = startPosition.getRow() - 1;
-            int col = startPosition.getColumn() - 1;
-            int newRow = newPosition.getRow() - 1;
-            int newCol = newPosition.getColumn() - 1;
-
-
-            if (promotionPiece != null) {
-                piece.type = promotionPiece;
+            if (move.getPromotionPiece() != null) {
+                clonedPiece = new ChessPiece(clonedPiece.getTeamColor(), move.getPromotionPiece());
             }
 
             // move the piece on cloned board
-            clonedBoard.boardPieces[newRow][newCol] = piece;
-            clonedBoard.boardPieces[row][col] = null;
+            clonedBoard.addPiece(endPosition, clonedPiece);
+            clonedBoard.addPiece(startPosition, null);
 
-            boolean isChecked = isInCheck(piece.getTeamColor());
-
-            if (!isChecked) {
+            if (!isInCheck(clonedPiece.getTeamColor())) {
                 validMoves.add(move);
             }
 
@@ -122,17 +114,13 @@ public class ChessGame {
              }
 
              if (isValidMove) {
-                 int row = startPosition.getRow() - 1;
-                 int col = startPosition.getColumn() - 1;
-                 int newRow = endPosition.getRow() - 1;
-                 int newCol = endPosition.getColumn() - 1;
 
                  if (promotionPiece != null) {
                      currentPiece.type = promotionPiece;
                  }
 
-                 currentBoard.boardPieces[newRow][newCol] = currentPiece;
-                 currentBoard.boardPieces[row][col] = null;
+                 currentBoard.addPiece(endPosition, currentPiece);
+                 currentBoard.addPiece(startPosition, null);
 
                  clonedBoard = currentBoard.copy();
 
