@@ -15,9 +15,11 @@ public class ChessPiece {
     ChessGame.TeamColor pieceColor;
     ChessPiece.PieceType type;
 
+
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
+
 
     }
     public ChessPiece() {}
@@ -27,6 +29,7 @@ public class ChessPiece {
 
         copiedPiece.pieceColor = this.pieceColor;
         copiedPiece.type = this.type;
+
 
         return copiedPiece;
     }

@@ -15,10 +15,14 @@ public class ChessGame {
     private ChessBoard currentBoard;
 
     private ChessBoard clonedBoard;
+
+
+
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
         currentBoard = new ChessBoard();
         currentBoard.resetBoard();
+
     }
 
     /**
@@ -36,6 +40,9 @@ public class ChessGame {
     public void setTeamTurn(TeamColor team) {
         teamTurn = team;
     }
+
+
+
 
     /**
      * Enum identifying the 2 possible teams in a chess game
@@ -55,6 +62,8 @@ public class ChessGame {
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         Collection<ChessMove> validMoves = new HashSet<>();
 
+        boolean checkForEnPassant = false;
+
         // start position
         ChessPiece piece = currentBoard.getPiece(startPosition);
         // get possible moves
@@ -63,6 +72,8 @@ public class ChessGame {
         // check if the move puts friendly king in check
         for (ChessMove move : possibleMoves) {
             clonedBoard = currentBoard.copy();
+
+
 
             // make the move
             ChessPosition endPosition = move.getEndPosition();
@@ -118,9 +129,9 @@ public class ChessGame {
                  if (promotionPiece != null) {
                      currentPiece.type = promotionPiece;
                  }
-
                  currentBoard.addPiece(endPosition, currentPiece);
                  currentBoard.addPiece(startPosition, null);
+
 
                  clonedBoard = currentBoard.copy();
 
@@ -257,4 +268,5 @@ public class ChessGame {
         }
         return null;
     }
+
 }
