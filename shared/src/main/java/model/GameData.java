@@ -1,6 +1,7 @@
 package model;
 
 import chess.ChessGame;
+import com.google.gson.Gson;
 
 public record GameData(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
     GameData replaceGameID(int newGameID) {
@@ -17,5 +18,9 @@ public record GameData(int gameID, String whiteUsername, String blackUsername, S
     }
     GameData replaceGame(ChessGame newGame) {
         return new GameData(gameID, whiteUsername, blackUsername, gameName, newGame);
+    }
+
+    public String toString() {
+        return new Gson().toJson(this);
     }
 }
