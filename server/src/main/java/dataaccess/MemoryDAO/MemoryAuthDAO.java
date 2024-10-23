@@ -4,9 +4,13 @@ import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import model.AuthData;
 
+import java.util.UUID;
+
 public class MemoryAuthDAO implements AuthDAO {
     @Override
     public String createAuthData(String username) throws DataAccessException {
+        String authToken = generateToken();
+
         return "";
     }
 
@@ -23,5 +27,10 @@ public class MemoryAuthDAO implements AuthDAO {
     @Override
     public void deleteAllAuthData() throws DataAccessException {
 
+    }
+
+    // create new authToken
+    public static String generateToken() {
+        return UUID.randomUUID().toString();
     }
 }
