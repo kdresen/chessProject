@@ -16,6 +16,7 @@ public class MemoryGameDAO implements GameDAO {
 
     public MemoryGameDAO() {
         this.games = new ArrayList<GameData>();
+        this.totalGames = 0;
     }
 
     @Override
