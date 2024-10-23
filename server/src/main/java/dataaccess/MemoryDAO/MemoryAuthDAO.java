@@ -4,33 +4,37 @@ import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import model.AuthData;
 
-import java.util.UUID;
+import java.util.*;
 
 public class MemoryAuthDAO implements AuthDAO {
-    @Override
-    public String createAuthData(String username) throws DataAccessException {
-        String authToken = generateToken();
+    private List<AuthData> auths;
 
-        return "";
+    public MemoryAuthDAO() {
+        this.auths = new ArrayList<AuthData>();
+    }
+
+    @Override
+    public String createAuthData(AuthData authData) throws DataAccessException {
+        authData.replaceAuthToken(UUID.randomUUID().toString());
+        auths.add(authData);
+        return authData.authToken();
     }
 
     @Override
     public AuthData getAuthData(String authToken) throws DataAccessException {
-        return null;
+        // cool optional class I learned about
+        Optional<AuthData> auth = auths.stream().filter(a -> Objects.equals(a.authToken(), authToken)).findFirst();
+        // returns null if the authToken is not found
+        return auth.orElse(null);
     }
 
     @Override
     public void deleteAuthData(String authToken) throws DataAccessException {
-
+        auths.removeIf(a -> Objects.equals(a.authToken(), authToken));
     }
 
     @Override
     public void deleteAllAuthData() throws DataAccessException {
-
-    }
-
-    // create new authToken
-    public static String generateToken() {
-        return UUID.randomUUID().toString();
+        auths.clear();
     }
 }

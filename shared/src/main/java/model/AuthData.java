@@ -9,6 +9,9 @@ public record AuthData(String authToken, String username) {
     AuthData replaceUsername(String newUsername) {
         return new AuthData(authToken, newUsername);
     }
+    public AuthData replaceAuthToken(String newAuthToken) {
+        return new AuthData(newAuthToken, username);
+    }
 
     public String toString() {
         return new Gson().toJson(this);
