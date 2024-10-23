@@ -6,13 +6,13 @@ import model.GameData;
 public interface GameDAO {
     // create a new game
     // returns the gameID
-    int createGame(String gameName) throws DataAccessException;
+    int createGame(GameData gameData) throws DataAccessException;
 
     // retrieve a game by the id
-    GameData getGameByID(int gameID) throws DataAccessException;
+    GameData getGameByName(String gameName) throws DataAccessException;
 
     // add a user to a game
-    void insertUser(int gameID, ChessGame.TeamColor playerColor) throws DataAccessException;
+    void insertUser(int gameID, String username, ChessGame.TeamColor playerColor) throws DataAccessException;
 
     // delete game
     void deleteGame(int gameID) throws DataAccessException;
