@@ -1,10 +1,13 @@
 package server;
 
+import dataaccess.MemoryDAO.MemoryUserDAO;
+import dataaccess.UserDAO;
 import spark.*;
 
 public class Server {
 
     public int run(int desiredPort) {
+        UserDAO userDAO = new MemoryUserDAO();
 
         Spark.port(desiredPort);
 

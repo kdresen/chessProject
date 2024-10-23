@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface UserDAO {
     // add a new user to the database
-    void createUser(UserData user) throws DataAccessException;
+    String createUser(UserData user) throws DataAccessException;
 
     // retrieve a user by their username
     UserData getUserByUsername(String username) throws DataAccessException;
