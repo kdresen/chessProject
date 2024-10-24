@@ -7,10 +7,18 @@ import model.AuthData;
 import java.util.*;
 
 public class MemoryAuthDAO implements AuthDAO {
+    private static MemoryAuthDAO instance;
     private List<AuthData> auths;
 
-    public MemoryAuthDAO() {
+    private MemoryAuthDAO() {
         this.auths = new ArrayList<AuthData>();
+    }
+
+    public static MemoryAuthDAO getInstance() {
+        if (instance == null) {
+            instance = new MemoryAuthDAO();
+        }
+        return instance;
     }
 
     @Override

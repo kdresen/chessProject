@@ -13,10 +13,18 @@ import java.util.Optional;
 public class MemoryGameDAO implements GameDAO {
     private List<GameData> games;
     private int totalGames;
+    private static MemoryGameDAO instance;
 
-    public MemoryGameDAO() {
+    private MemoryGameDAO() {
         this.games = new ArrayList<GameData>();
         this.totalGames = 0;
+    }
+
+    public static MemoryGameDAO getInstance() {
+        if (instance == null) {
+            instance = new MemoryGameDAO();
+        }
+        return instance;
     }
 
     @Override

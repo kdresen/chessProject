@@ -5,6 +5,7 @@ import model.UserData;
 import java.util.List;
 
 public interface UserDAO {
+
     // add a new user to the database
     String createUser(UserData user) throws DataAccessException;
 

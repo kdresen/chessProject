@@ -10,10 +10,20 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class MemoryUserDAO implements UserDAO {
-    private List<UserData> users;
+    private static MemoryUserDAO instance;
+    private final List<UserData> users;
 
-    public MemoryUserDAO() {
+
+
+    private MemoryUserDAO() {
         this.users = new ArrayList<UserData>();
+    }
+
+    public static MemoryUserDAO getInstance() {
+        if (instance == null) {
+            instance = new MemoryUserDAO();
+        }
+        return instance;
     }
 
     @Override

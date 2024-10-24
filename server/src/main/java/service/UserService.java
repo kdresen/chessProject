@@ -2,6 +2,8 @@ package service;
 
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
+import dataaccess.MemoryDAO.MemoryAuthDAO;
+import dataaccess.MemoryDAO.MemoryUserDAO;
 import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
@@ -18,23 +20,30 @@ public class UserService {
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
 
-    public UserService(UserDAO userDAO, AuthDAO authDAO) {
-        this.userDAO = userDAO;
-        this.authDAO = authDAO;
+    public UserService() {
+        this.userDAO = MemoryUserDAO.getInstance();
+        this.authDAO = MemoryAuthDAO.getInstance();
     }
 
-    public RegisterResult register(RegisterRequest registerRequest) {
-        try {
-            UserData newUser = new UserData(registerRequest.username(), registerRequest.email(), registerRequest.password());
-            String username = userDAO.createUser(newUser);
-            AuthData authData = new AuthData(UUID.randomUUID().toString() ,registerRequest.username());
-            AuthData authResult = authDAO.createAuthData(authData);
+    public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException {
 
-            return new RegisterResult(username, authResult.authToken());
-        } catch (DataAccessException e) {
-            // TODO fix this
-            throw new RuntimeException();
+        if (Objects.equals(registerRequest, null)) {
+            throw new DataAccessException("Error: bad request");
         }
+        if (registerRequest.username() == null || registerRequest.password() == null || registerRequest.email() == null) {
+            throw new DataAccessException("Error: bad request");
+        }
+        UserData user = userDAO.getUserByUsername(registerRequest.username());
+        if (user != null) {
+            throw new DataAccessException("Error: already taken");
+        }
+        UserData newUser = new UserData(registerRequest.username(), registerRequest.email(), registerRequest.password());
+        String username = userDAO.createUser(newUser);
+        AuthData authData = new AuthData(UUID.randomUUID().toString() ,registerRequest.username());
+        AuthData authResult = authDAO.createAuthData(authData);
+
+        return new RegisterResult(username, authResult.authToken());
+
     }
     public LoginResult login(LoginRequest loginRequest) {
         try {
