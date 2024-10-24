@@ -13,6 +13,7 @@ import request.RegisterRequest;
 import result.LoginResult;
 import result.RegisterResult;
 
+import javax.xml.crypto.Data;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -37,7 +38,7 @@ public class UserService {
         if (user != null) {
             throw new DataAccessException("Error: already taken");
         }
-        UserData newUser = new UserData(registerRequest.username(), registerRequest.email(), registerRequest.password());
+        UserData newUser = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
         String username = userDAO.createUser(newUser);
         AuthData authData = new AuthData(UUID.randomUUID().toString() ,registerRequest.username());
         AuthData authResult = authDAO.createAuthData(authData);
@@ -45,23 +46,16 @@ public class UserService {
         return new RegisterResult(username, authResult.authToken());
 
     }
-    public LoginResult login(LoginRequest loginRequest) {
-        try {
-            UserData user = userDAO.getUserByUsername(loginRequest.username());
-            if (user != null && Objects.equals(user.password(), loginRequest.password())) {
-                AuthData authResult = authDAO.createAuthData(new AuthData(loginRequest.username(), loginRequest.authToken()));
-                return new LoginResult(user.username(), authResult.authToken());
-            } else {
-                // TODO fix this
-                throw new DataAccessException("Error: unauthorized");
-            }
-
-        } catch (DataAccessException e) {
-            // TODO fix this
-            throw new RuntimeException(e);
+    public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
+        UserData user = userDAO.getUserByUsername(loginRequest.username());
+        if (user != null && Objects.equals(user.password(), loginRequest.password())) {
+            AuthData authResult = authDAO.createAuthData(new AuthData(UUID.randomUUID().toString(), user.username()));
+            return new LoginResult(authResult.username(), authResult.authToken());
+        } else {
+            throw new DataAccessException("Error: unauthorized");
         }
     }
-    public void logout(LogoutRequest logoutRequest) {
+    public void logout(LogoutRequest logoutRequest) throws DataAccessException {
         try {
             AuthData auth = authDAO.getAuthData(logoutRequest.authToken());
             if (auth != null) {

@@ -10,13 +10,18 @@ import dataaccess.MemoryDAO.MemoryUserDAO;
 import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
+import request.LoginRequest;
+import request.LogoutRequest;
 import request.RegisterRequest;
+import result.LoginResult;
 import result.RegisterResult;
 import service.AdminService;
 import service.GameService;
 import service.UserService;
 import spark.*;
 
+import javax.xml.crypto.Data;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -49,6 +54,8 @@ public class Server {
         // Register your endpoints and handle exceptions here.
         Spark.post("/user", this::registerUser);
         Spark.delete("/db", this::deleteAll);
+        Spark.post("/session", this::loginUser);
+        Spark.delete("/session", this::logoutUser);
         Spark.exception(DataAccessException.class, this::exceptionHandler);
 
         Spark.awaitInitialization();
@@ -82,7 +89,7 @@ public class Server {
     private Object deleteAll(Request req, Response res) {
         try {
             adminService.clearApplication();
-            return null;
+            return gson.toJson(new HashMap<>());
         } catch (DataAccessException ex) {
             return exceptionHandler(ex, req, res);
         }
@@ -92,11 +99,30 @@ public class Server {
             UserData userData = new Gson().fromJson(req.body(), UserData.class);
             RegisterResult result = userService.register(new RegisterRequest(userData.username(), userData.password(), userData.email()));
             res.status(200);
-            return new Gson().toJson(result);
+            return gson.toJson(result);
         } catch (DataAccessException ex) {
             return exceptionHandler(ex, req, res);
         }
 
+    }
+    private Object loginUser(Request req, Response res) {
+        try {
+            UserData userData = new Gson().fromJson(req.body(), UserData.class);
+            LoginResult result = userService.login(new LoginRequest(userData.username(), userData.password()));
+            res.status(200);
+            return gson.toJson(result);
+        } catch (DataAccessException ex) {
+            return exceptionHandler(ex, req, res);
+        }
+    }
+    private Object logoutUser(Request req, Response res) {
+        try {
+            AuthData authData = new Gson().fromJson(req.headers("authorization"), AuthData.class);
+            userService.logout(new LogoutRequest(authData.authToken()));
+            return null;
+        } catch (DataAccessException ex) {
+            return exceptionHandler(ex, req, res);
+        }
     }
 
 

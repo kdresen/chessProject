@@ -1,4 +1,4 @@
 package request;
 
-public record LoginRequest(String username, String password, String authToken) {
+public record LoginRequest(String username, String password) {
 }
