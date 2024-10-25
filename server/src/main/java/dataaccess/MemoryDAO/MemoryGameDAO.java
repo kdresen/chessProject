@@ -28,30 +28,44 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public int createGame(GameData gameData) throws DataAccessException {
+    public int createGame(String gameName) throws DataAccessException {
         totalGames++;
-        gameData = gameData.replaceGameID(totalGames);
+        GameData gameData = new GameData(totalGames, null, null, gameName, new ChessGame());
         games.add(gameData);
         return gameData.gameID();
     }
 
     @Override
-    public GameData getGameByName(String gameName) throws DataAccessException {
+    public GameData getGameByID(int gameID) throws DataAccessException {
         // cool optional object I just learned about
-        Optional<GameData> game = games.stream().filter(g -> Objects.equals(g.gameName(), gameName)).findFirst();
+        Optional<GameData> game = games.stream().filter(g -> Objects.equals(g.gameID(), gameID)).findFirst();
         // return null if game is not found
         return game.orElse(null);
     }
 
     @Override
+    public List<GameData> getAllGames() throws DataAccessException {
+        return new ArrayList<>(games);
+    }
+
+    @Override
     public void insertUser(int gameID, String username, ChessGame.TeamColor playerColor) throws DataAccessException {
-        for (GameData gameData : games) {
+        for (int i = 0; i < games.size(); i++) {
+            GameData gameData = games.get(i);
             if (gameData.gameID() == gameID) {
                 if (playerColor == ChessGame.TeamColor.BLACK) {
-                    gameData.replaceBlackUsername(username);
+                    if (gameData.blackUsername() != null) {
+                        throw new DataAccessException("Error: already taken");
+                    }
+                    games.set(i, gameData.replaceBlackUsername(username));
                 } else {
-                    gameData.replaceWhiteUsername(username);
+                    if (gameData.whiteUsername() != null) {
+                        throw new DataAccessException("Error: already taken");
+                    }
+                    games.set(i, gameData.replaceWhiteUsername(username));
+
                 }
+                break;
             }
         }
     }

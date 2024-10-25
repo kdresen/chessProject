@@ -56,16 +56,14 @@ public class UserService {
         }
     }
     public void logout(LogoutRequest logoutRequest) throws DataAccessException {
-        try {
-            AuthData auth = authDAO.getAuthData(logoutRequest.authToken());
-            if (auth != null) {
-                authDAO.deleteAuthData(auth.authToken());
-            } else {
-                throw new DataAccessException("Error: unauthorized");
-            }
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+
+        AuthData auth = authDAO.getAuthData(logoutRequest.authToken());
+        if (auth != null) {
+            authDAO.deleteAuthData(auth.authToken());
+        } else {
+            throw new DataAccessException("Error: unauthorized");
         }
+
     }
 
 

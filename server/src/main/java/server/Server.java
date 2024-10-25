@@ -9,21 +9,17 @@ import dataaccess.MemoryDAO.MemoryGameDAO;
 import dataaccess.MemoryDAO.MemoryUserDAO;
 import dataaccess.UserDAO;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
-import request.LoginRequest;
-import request.LogoutRequest;
-import request.RegisterRequest;
-import result.LoginResult;
-import result.RegisterResult;
+import request.*;
+import result.*;
 import service.AdminService;
 import service.GameService;
 import service.UserService;
 import spark.*;
 
-import javax.xml.crypto.Data;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class Server {
     private final UserService userService;
@@ -56,6 +52,9 @@ public class Server {
         Spark.delete("/db", this::deleteAll);
         Spark.post("/session", this::loginUser);
         Spark.delete("/session", this::logoutUser);
+        Spark.get("/game", this::listGames);
+        Spark.post("/game", this::createGame);
+        Spark.put("/game", this::joinGame);
         Spark.exception(DataAccessException.class, this::exceptionHandler);
 
         Spark.awaitInitialization();
@@ -117,9 +116,41 @@ public class Server {
     }
     private Object logoutUser(Request req, Response res) {
         try {
-            AuthData authData = new Gson().fromJson(req.headers("authorization"), AuthData.class);
-            userService.logout(new LogoutRequest(authData.authToken()));
-            return null;
+            LogoutRequest authData = new LogoutRequest(req.headers("authorization"));
+            userService.logout(authData);
+            return gson.toJson(new HashMap<>());
+        } catch (DataAccessException ex) {
+            return exceptionHandler(ex, req, res);
+        }
+    }
+    private Object listGames(Request req, Response res) {
+        try {
+            ListGamesRequest request = new ListGamesRequest(req.headers("authorization"));
+            ListGamesResult result = gameService.listGames(request);
+            res.status(200);
+            return gson.toJson(result);
+        } catch (DataAccessException ex) {
+            return exceptionHandler(ex, req, res);
+        }
+    }
+    private Object createGame(Request req, Response res) {
+        try {
+            GameData newGame = new Gson().fromJson(req.body(), GameData.class);
+            CreateGamesRequest request = new CreateGamesRequest(newGame.gameName(), req.headers("authorization"));
+            CreateGamesResult result = gameService.createGame(request);
+            res.status(200);
+            return gson.toJson(result);
+        } catch (DataAccessException ex) {
+            return exceptionHandler(ex, req, res);
+        }
+    }
+    private Object joinGame(Request req, Response res) {
+        try {
+            JoinGameRequest request = gson.fromJson(req.body(), JoinGameRequest.class);
+            request = request.replaceAuthToken(req.headers("authorization"));
+            JoinGameResult result = gameService.joinGame(request);
+            res.status(200);
+            return gson.toJson(result);
         } catch (DataAccessException ex) {
             return exceptionHandler(ex, req, res);
         }
