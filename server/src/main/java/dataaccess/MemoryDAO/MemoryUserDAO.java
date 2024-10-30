@@ -42,12 +42,6 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     @Override
-    public List<UserData> getAllUsers() throws DataAccessException {
-        // returns a copy of the list of users
-        return new ArrayList<>(users);
-    }
-
-    @Override
     public void deleteAllUsers() throws DataAccessException {
         users.clear();
     }

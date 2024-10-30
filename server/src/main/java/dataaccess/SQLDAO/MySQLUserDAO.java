@@ -18,11 +18,6 @@ public class MySQLUserDAO implements UserDAO {
     }
 
     @Override
-    public List<UserData> getAllUsers() throws DataAccessException {
-        return List.of();
-    }
-
-    @Override
     public void deleteAllUsers() throws DataAccessException {
 
     }

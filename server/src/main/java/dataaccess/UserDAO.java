@@ -12,9 +12,6 @@ public interface UserDAO {
     // retrieve a user by their username
     UserData getUserByUsername(String username) throws DataAccessException;
 
-    // retrieve a list of all users
-    List<UserData> getAllUsers() throws DataAccessException;
-
     // delete all users
     void deleteAllUsers() throws DataAccessException;
 }
