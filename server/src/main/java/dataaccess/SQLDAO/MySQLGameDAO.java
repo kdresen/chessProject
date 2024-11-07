@@ -21,7 +21,7 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public int createGame(String gameName) throws DataAccessException {
-        String sql = "INSERT INTO games (whiteUsername, blackUsername, gameName, game) VALUES (?,?,?,?,?,?)";
+        String sql = "INSERT INTO games (whiteUsername, blackUsername, gameName, game) VALUES (?,?,?,?)";
         String whiteUsername = null;
         String blackUsername = null;
         ChessGame game = new ChessGame();
@@ -105,7 +105,7 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public void insertUser(int gameID, String username, ChessGame.TeamColor playerColor) throws DataAccessException {
-        String column = (playerColor == ChessGame.TeamColor.BLACK) ? "whiteUsername" : "blackUsername";
+        String column = (playerColor == ChessGame.TeamColor.BLACK) ? "blackUsername" : "whiteUsername";
         String sql = "UPDATE games SET " + column + " = ? WHERE gameID = ? AND " + column + " IS NULL";
 
         try (var conn = DatabaseManager.getConnection();
@@ -155,7 +155,7 @@ public class MySQLGameDAO implements GameDAO {
 
     private final String[] createStatements = {
             """
-            CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE IF NOT EXISTS games (
             `gameID` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
             `whiteUsername` varchar(255),
             `blackUsername` varchar(255),

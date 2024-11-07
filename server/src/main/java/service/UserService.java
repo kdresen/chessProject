@@ -54,9 +54,12 @@ public class UserService {
 
     }
     public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
-        UserData user = userDAO.getUserByUsername(loginRequest.username());
+        //UserData user = userDAO.getUserByUsername(loginRequest.username());
+        if (loginRequest.password() == null || loginRequest.username() == null) {
+            throw new DataAccessException("Error: unauthorized");
+        }
         if (userDAO.verifyUser(loginRequest.username(), loginRequest.password())) {
-            AuthData authResult = authDAO.createAuthData(new AuthData(UUID.randomUUID().toString(), user.username()));
+            AuthData authResult = authDAO.createAuthData(new AuthData(UUID.randomUUID().toString(), loginRequest.username()));
             return new LoginResult(authResult.username(), authResult.authToken());
         } else {
             throw new DataAccessException("Error: unauthorized");

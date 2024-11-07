@@ -48,6 +48,7 @@ public class MySQLUserDAO implements UserDAO {
                     return rs.getString("password");
                 }
             }
+
             return null;
 
         } catch (SQLException e) {
@@ -57,6 +58,9 @@ public class MySQLUserDAO implements UserDAO {
 
     public boolean verifyUser(String username, String providedClearTextPassword) throws DataAccessException {
         var hashedPassword = readHashedPasswordFromDatabase(username);
+        if (hashedPassword == null) {
+            return false;
+        }
 
         return BCrypt.checkpw(providedClearTextPassword, hashedPassword);
     }
@@ -101,9 +105,9 @@ public class MySQLUserDAO implements UserDAO {
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS users (
-            ``username` varchar(50) NOT NULL PRIMARY KEY,
+            `username` varchar(50) NOT NULL PRIMARY KEY,
             `password` varchar(255) NOT NULL,
-            `email` varchar(100) NOT NULL,`
+            `email` varchar(100) NOT NULL
             ) ENGINE=InnoDB DEFAULT CHARSET= utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };
