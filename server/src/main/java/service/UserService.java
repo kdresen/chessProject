@@ -4,6 +4,8 @@ import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDAO.MemoryAuthDAO;
 import dataaccess.MemoryDAO.MemoryUserDAO;
+import dataaccess.SQLDAO.MySQLAuthDAO;
+import dataaccess.SQLDAO.MySQLUserDAO;
 import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
@@ -21,9 +23,15 @@ public class UserService {
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
 
-    public UserService() {
-        this.userDAO = MemoryUserDAO.getInstance();
-        this.authDAO = MemoryAuthDAO.getInstance();
+    public UserService(boolean isSQL) {
+        if (isSQL) {
+            this.userDAO = new MySQLUserDAO();
+            this.authDAO = new MySQLAuthDAO();
+        } else {
+            this.userDAO = MemoryUserDAO.getInstance();
+            this.authDAO = MemoryAuthDAO.getInstance();
+        }
+
     }
 
     public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException {
@@ -48,7 +56,7 @@ public class UserService {
     }
     public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
         UserData user = userDAO.getUserByUsername(loginRequest.username());
-        if (user != null && Objects.equals(user.password(), loginRequest.password())) {
+        if (userDAO.verifyUser(loginRequest.username(), loginRequest.password())) {
             AuthData authResult = authDAO.createAuthData(new AuthData(UUID.randomUUID().toString(), user.username()));
             return new LoginResult(authResult.username(), authResult.authToken());
         } else {

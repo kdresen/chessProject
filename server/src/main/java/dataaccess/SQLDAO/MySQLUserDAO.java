@@ -4,34 +4,61 @@ import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
 import dataaccess.DatabaseManager;
 import model.UserData;
-import java.sql.*;
+import org.mindrot.jbcrypt.BCrypt;
 
-import java.util.List;
+import java.sql.*;
 
 public class MySQLUserDAO implements UserDAO {
 
+    public MySQLUserDAO() {
+        configureDatabase();
+    }
+
     @Override
     public String createUser(UserData user) throws DataAccessException {
+        String hashedPassword = BCrypt.hashpw(user.password(), BCrypt.gensalt());
         String sql = "INSERT INTO users (username, password, email) VALUES (?,?,?)";
 
         try (var conn = DatabaseManager.getConnection();
-             var ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             var ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, user.username());
-            ps.setString(2, user.password());
+            ps.setString(2, hashedPassword);
             ps.setString(3, user.email());
 
             ps.executeUpdate();
-            ResultSet rs = ps.getGeneratedKeys();
 
-            if (rs.next()) {
-                return rs.getString(1);
+            return user.username();
+
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    private String readHashedPasswordFromDatabase(String username) throws DataAccessException {
+        String sql = "SELECT password FROM users WHERE username = ?";
+
+        try (var conn = DatabaseManager.getConnection();
+             var ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, username);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("password");
+                }
             }
             return null;
 
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
+    }
+
+    public boolean verifyUser(String username, String providedClearTextPassword) throws DataAccessException {
+        var hashedPassword = readHashedPasswordFromDatabase(username);
+
+        return BCrypt.checkpw(providedClearTextPassword, hashedPassword);
     }
 
     @Override
@@ -60,38 +87,11 @@ public class MySQLUserDAO implements UserDAO {
     @Override
     public void deleteAllUsers() throws DataAccessException {
         String sql = "TRUNCATE users";
-        executeUpdate(sql);
-    }
 
-    private int executeUpdate(String statement, Object... params) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection();
-             var ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
-
-            for (int i = 0; i < params.length; i++) {
-                var param = params[i];
-                if (param instanceof String) {
-                    ps.setString(i + 1, (String) param);
-                } else if (param instanceof Integer) {
-                    ps.setInt(i + 1, (Integer) param);
-                } else if (param instanceof Boolean) {
-                    ps.setBoolean(i + 1, (Boolean) param);
-                } else if (param instanceof Double) {
-                    ps.setDouble(i + 1, (Double) param);
-                } else if (param == null) {
-                    ps.setNull(i + 1, Types.NULL);
-                } else {
-                    throw new DataAccessException("Unsupported parameter type: " + param.getClass().getName());
-                }
-            }
+             var ps = conn.prepareStatement(sql)) {
 
             ps.executeUpdate();
-
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-            }
-            return 0;
 
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
@@ -108,16 +108,20 @@ public class MySQLUserDAO implements UserDAO {
             """
     };
 
-    private void configureDatabase() throws DataAccessException {
-        DatabaseManager.createDatabase();
-        try (var conn = DatabaseManager.getConnection()) {
-            for (var statement : createStatements) {
-                try (var ps = conn.prepareStatement(statement)) {
-                    ps.executeUpdate();
+    private void configureDatabase() {
+
+        try {
+            DatabaseManager.createDatabase();
+            try (var conn = DatabaseManager.getConnection()) {
+                for (var statement : createStatements) {
+                    try (var ps = conn.prepareStatement(statement)) {
+                        ps.executeUpdate();
+                    }
                 }
             }
-        } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
+        } catch (SQLException | DataAccessException e) {
+            System.out.printf(e.getMessage());
         }
+
     }
 }

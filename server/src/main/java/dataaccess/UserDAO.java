@@ -12,6 +12,8 @@ public interface UserDAO {
     // retrieve a user by their username
     UserData getUserByUsername(String username) throws DataAccessException;
 
+    boolean verifyUser(String username, String password) throws DataAccessException;
+
     // delete all users
     void deleteAllUsers() throws DataAccessException;
 }

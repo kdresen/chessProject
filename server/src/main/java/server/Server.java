@@ -1,14 +1,9 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.AuthDAO;
+
 import dataaccess.DataAccessException;
-import dataaccess.GameDAO;
-import dataaccess.MemoryDAO.MemoryAuthDAO;
-import dataaccess.MemoryDAO.MemoryGameDAO;
-import dataaccess.MemoryDAO.MemoryUserDAO;
-import dataaccess.UserDAO;
-import model.AuthData;
+
 import model.GameData;
 import model.UserData;
 import request.*;
@@ -26,15 +21,20 @@ public class Server {
     private final GameService gameService;
     private final AdminService adminService;
     private final Gson gson = new Gson();
+    boolean SQL = false;
 
 
     public Server() {
-        this.userService = new UserService();
-        this.gameService = new GameService();
-        this.adminService = new AdminService();
-        UserDAO userDAO = MemoryUserDAO.getInstance();
-        AuthDAO authDAO = MemoryAuthDAO.getInstance();
-        GameDAO gameDAO = MemoryGameDAO.getInstance();
+        if (SQL) {
+            this.userService = new UserService(true);
+            this.gameService = new GameService(true);
+            this.adminService = new AdminService(true);
+        } else {
+            this.userService = new UserService(false);
+            this.gameService = new GameService(false);
+            this.adminService = new AdminService(false);
+        }
+
     }
 
 

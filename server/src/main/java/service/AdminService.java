@@ -14,7 +14,7 @@ public class AdminService {
     private final GameDAO gameDAO;
 
 
-    public AdminService() {
+    public AdminService(boolean isSQL) {
         this.userDAO = MemoryUserDAO.getInstance();
         this.authDAO = MemoryAuthDAO.getInstance();
         this.gameDAO = MemoryGameDAO.getInstance();

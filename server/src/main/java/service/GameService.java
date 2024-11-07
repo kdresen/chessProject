@@ -23,7 +23,7 @@ public class GameService {
     private final GameDAO gameDAO;
     private final AuthDAO authDAO;
 
-    public GameService() {
+    public GameService(boolean isSQL) {
         this.gameDAO = MemoryGameDAO.getInstance();
         this.authDAO = MemoryAuthDAO.getInstance();
     }
