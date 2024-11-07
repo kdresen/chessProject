@@ -83,7 +83,22 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public void insertUser(int gameID, String username, ChessGame.TeamColor playerColor) throws DataAccessException {
+        String column = (playerColor == ChessGame.TeamColor.BLACK) ? "whiteUsername" : "blackUsername";
+        String sql = "UPDATE games SET " + column + " = ? WHERE gameID = ? AND " + column + " IS NULL";
 
+        try (var conn = DatabaseManager.getConnection();
+             var ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, username);
+            ps.setInt(2, gameID);
+
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new DataAccessException("Error: already taken");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
