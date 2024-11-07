@@ -41,9 +41,19 @@ public class MemoryUserDAO implements UserDAO {
         return user.orElse(null);
     }
 
+    private String getPasswordByUsername(String username) throws DataAccessException {
+        Optional<UserData> user = users.stream().filter(u -> Objects.equals(u.username(), username)).findFirst();
+
+        return user.map(UserData::password).orElse(null);
+    }
+
     @Override
     public boolean verifyUser(String username, String password) throws DataAccessException {
-        return false;
+        String storedPassword = getPasswordByUsername(username);
+        if (storedPassword == null) {
+            return false;
+        }
+        return storedPassword.equals(password);
     }
 
     @Override
