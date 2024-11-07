@@ -27,7 +27,9 @@ public class MySQLUserDAOTest {
     }
 
     @Test
-    void testCreateUser_Negative() {
+    void testCreateUser_Negative() throws DataAccessException {
+        userDAO.createUser(testUser);
+
         assertThrows(DataAccessException.class, () -> userDAO.createUser(testUser), "Should not create duplicate user");
 
     }
