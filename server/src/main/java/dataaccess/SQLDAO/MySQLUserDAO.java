@@ -86,7 +86,7 @@ public class MySQLUserDAO implements UserDAO {
 
     @Override
     public void deleteAllUsers() throws DataAccessException {
-        String sql = "TRUNCATE users";
+        String sql = "TRUNCATE TABLE users";
 
         try (var conn = DatabaseManager.getConnection();
              var ps = conn.prepareStatement(sql)) {

@@ -51,6 +51,28 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public GameData getGameByID(int gameID) throws DataAccessException {
+        String sql = "SELECT * FROM games WHERE gameID = ?";
+
+        try (var conn = DatabaseManager.getConnection();
+             var ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, gameID);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    var whiteUsername = rs.getString("whiteUsername");
+                    var blackUsername = rs.getString("blackUsername");
+                    var gameName = rs.getString("gameName");
+
+                    var json = rs.getString("game");
+                    var game = new Gson().fromJson(json, ChessGame.class);
+                    return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
+
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return null;
     }
 
@@ -103,12 +125,32 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public void deleteGame(int gameID) throws DataAccessException {
+        String sql = "DELETE FROM games WHERE gameID = ?";
+
+        try (var conn = DatabaseManager.getConnection();
+             var ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, gameID);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
 
     }
 
     @Override
     public void deleteAllGames() throws DataAccessException {
+        String sql = "TRUNCATE TABLE games";
 
+        try (var conn = DatabaseManager.getConnection();
+             var ps = conn.prepareStatement(sql)) {
+
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
     private final String[] createStatements = {
