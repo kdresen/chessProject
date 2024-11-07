@@ -6,6 +6,8 @@ import dataaccess.GameDAO;
 import dataaccess.MemoryDAO.MemoryAuthDAO;
 import dataaccess.MemoryDAO.MemoryGameDAO;
 import dataaccess.MemoryDAO.MemoryUserDAO;
+import dataaccess.SQLDAO.MySQLAuthDAO;
+import dataaccess.SQLDAO.MySQLGameDAO;
 import model.AuthData;
 import model.GameData;
 import request.CreateGamesRequest;
@@ -24,8 +26,13 @@ public class GameService {
     private final AuthDAO authDAO;
 
     public GameService(boolean isSQL) {
-        this.gameDAO = MemoryGameDAO.getInstance();
-        this.authDAO = MemoryAuthDAO.getInstance();
+        if (isSQL) {
+            this.gameDAO = new MySQLGameDAO();
+            this.authDAO = new MySQLAuthDAO();
+        } else {
+            this.gameDAO = MemoryGameDAO.getInstance();
+            this.authDAO = MemoryAuthDAO.getInstance();
+        }
     }
 
     public CreateGamesResult createGame(CreateGamesRequest request) throws DataAccessException {

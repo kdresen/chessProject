@@ -6,6 +6,9 @@ import dataaccess.GameDAO;
 import dataaccess.MemoryDAO.MemoryAuthDAO;
 import dataaccess.MemoryDAO.MemoryGameDAO;
 import dataaccess.MemoryDAO.MemoryUserDAO;
+import dataaccess.SQLDAO.MySQLAuthDAO;
+import dataaccess.SQLDAO.MySQLGameDAO;
+import dataaccess.SQLDAO.MySQLUserDAO;
 import dataaccess.UserDAO;
 
 public class AdminService {
@@ -15,9 +18,17 @@ public class AdminService {
 
 
     public AdminService(boolean isSQL) {
-        this.userDAO = MemoryUserDAO.getInstance();
-        this.authDAO = MemoryAuthDAO.getInstance();
-        this.gameDAO = MemoryGameDAO.getInstance();
+
+        if (isSQL) {
+            this.userDAO = new MySQLUserDAO();
+            this.authDAO = new MySQLAuthDAO();
+            this.gameDAO = new MySQLGameDAO();
+        } else {
+            this.userDAO = MemoryUserDAO.getInstance();
+            this.authDAO = MemoryAuthDAO.getInstance();
+            this.gameDAO = MemoryGameDAO.getInstance();
+        }
+
     }
 
     public void clearApplication() throws DataAccessException {
