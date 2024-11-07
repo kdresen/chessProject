@@ -10,10 +10,10 @@ import model.GameData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MySQLGameDAO implements GameDAO {
-    private final Gson gson = new Gson();
 
     public MySQLGameDAO() {
         configureDatabase();
@@ -32,7 +32,8 @@ public class MySQLGameDAO implements GameDAO {
             ps.setString(1, whiteUsername);
             ps.setString(2, blackUsername);
             ps.setString(3, gameName);
-            ps.setString(4, gson.toJson(game));
+            var json = new Gson().toJson(game);
+            ps.setString(4, json);
 
             ps.executeUpdate();
 
@@ -55,7 +56,29 @@ public class MySQLGameDAO implements GameDAO {
 
     @Override
     public List<GameData> getAllGames() throws DataAccessException {
-        return List.of();
+        String sql = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games";
+
+        var games = new ArrayList<GameData>();
+        try (var conn = DatabaseManager.getConnection();
+             var ps = conn.prepareStatement(sql)) {
+            try (var rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    var gameID = rs.getInt("gameID");
+                    var whiteUsername = rs.getString("whiteUsername");
+                    var blackUsername = rs.getString("blackUsername");
+                    var gameName = rs.getString("gameName");
+
+                    var json = rs.getString("game");
+                    var game = new Gson().fromJson(json, ChessGame.class);
+                    games.add(new GameData(gameID, whiteUsername, blackUsername, gameName, game));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+
+        return games;
     }
 
     @Override
@@ -76,11 +99,11 @@ public class MySQLGameDAO implements GameDAO {
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS users (
-            `gameID` INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `gameID` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
             `whiteUsername` varchar(255),
             `blackUsername` varchar(255),
             `gameName` varchar(255) NOT NULL,
-            `game` JSON NOT NULL
+            `game` longtext NOT NULL
             ) ENGINE=InnoDB DEFAULT CHARSET= utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };
