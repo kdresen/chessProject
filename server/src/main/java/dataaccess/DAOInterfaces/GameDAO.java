@@ -1,6 +1,7 @@
-package dataaccess;
+package dataaccess.DAOInterfaces;
 
 import chess.ChessGame;
+import dataaccess.DataAccessException;
 import model.GameData;
 
 import java.util.List;

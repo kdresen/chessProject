@@ -1,7 +1,7 @@
 package dataaccess.MemoryDAO;
 
 import dataaccess.DataAccessException;
-import dataaccess.UserDAO;
+import dataaccess.DAOInterfaces.UserDAO;
 import model.UserData;
 
 import java.util.ArrayList;

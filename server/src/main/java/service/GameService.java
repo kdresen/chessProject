@@ -1,11 +1,10 @@
 package service;
 
-import dataaccess.AuthDAO;
+import dataaccess.DAOInterfaces.AuthDAO;
 import dataaccess.DataAccessException;
-import dataaccess.GameDAO;
+import dataaccess.DAOInterfaces.GameDAO;
 import dataaccess.MemoryDAO.MemoryAuthDAO;
 import dataaccess.MemoryDAO.MemoryGameDAO;
-import dataaccess.MemoryDAO.MemoryUserDAO;
 import dataaccess.SQLDAO.MySQLAuthDAO;
 import dataaccess.SQLDAO.MySQLGameDAO;
 import model.AuthData;
@@ -17,7 +16,6 @@ import result.CreateGamesResult;
 import result.JoinGameResult;
 import result.ListGamesResult;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 

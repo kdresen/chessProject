@@ -1,15 +1,15 @@
 package service;
 
-import dataaccess.AuthDAO;
+import dataaccess.DAOInterfaces.AuthDAO;
 import dataaccess.DataAccessException;
-import dataaccess.GameDAO;
+import dataaccess.DAOInterfaces.GameDAO;
 import dataaccess.MemoryDAO.MemoryAuthDAO;
 import dataaccess.MemoryDAO.MemoryGameDAO;
 import dataaccess.MemoryDAO.MemoryUserDAO;
 import dataaccess.SQLDAO.MySQLAuthDAO;
 import dataaccess.SQLDAO.MySQLGameDAO;
 import dataaccess.SQLDAO.MySQLUserDAO;
-import dataaccess.UserDAO;
+import dataaccess.DAOInterfaces.UserDAO;
 
 public class AdminService {
     private final UserDAO userDAO;

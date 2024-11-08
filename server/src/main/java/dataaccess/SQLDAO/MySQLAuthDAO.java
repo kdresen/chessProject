@@ -1,6 +1,6 @@
 package dataaccess.SQLDAO;
 
-import dataaccess.AuthDAO;
+import dataaccess.DAOInterfaces.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.DatabaseManager;
 import model.AuthData;

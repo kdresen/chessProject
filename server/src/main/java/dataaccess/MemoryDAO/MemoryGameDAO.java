@@ -2,7 +2,7 @@ package dataaccess.MemoryDAO;
 
 import chess.ChessGame;
 import dataaccess.DataAccessException;
-import dataaccess.GameDAO;
+import dataaccess.DAOInterfaces.GameDAO;
 import model.GameData;
 
 import java.util.ArrayList;
