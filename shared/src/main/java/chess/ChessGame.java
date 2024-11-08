@@ -62,8 +62,6 @@ public class ChessGame {
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         Collection<ChessMove> validMoves = new HashSet<>();
 
-        boolean checkForEnPassant = false;
-
         // start position
         ChessPiece piece = currentBoard.getPiece(startPosition);
         // get possible moves
@@ -190,12 +188,13 @@ public class ChessGame {
                 for (int col = 1; col <= 8; col++) {
                     ChessPiece piece = currentBoard.getPiece(row, col);
 
-                    if (piece != null && piece.getTeamColor() == teamColor) {
-                        Collection<ChessMove> currentTeamMoves = validMoves(new ChessPosition(row, col));
+                    if (piece == null || piece.getTeamColor() != teamColor) {
+                        continue;
+                    }
+                    Collection<ChessMove> currentTeamMoves = validMoves(new ChessPosition(row, col));
 
-                        if (!currentTeamMoves.isEmpty()) {
-                            return false;
-                        }
+                    if (!currentTeamMoves.isEmpty()) {
+                        return false;
                     }
                 }
             }
