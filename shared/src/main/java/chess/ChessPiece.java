@@ -282,10 +282,10 @@ public class ChessPiece {
         checkDiagonalCapture(board, myPosition, possibleMoves, oneForward, col + 1, teamColor);
     }
 
-    private void checkDiagonalCapture(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves, int newRow, int newCol, boolean teamColor) {
-        if (isWithinBounds(newRow, newCol)) {
-            ChessPosition diagonalPosition = new ChessPosition(newRow, newCol);
-            checkNewSpacePawn(board, myPosition, diagonalPosition, possibleMoves, false, teamColor, true);
+    private void checkDiagonalCapture(ChessBoard board, ChessPosition mP, Collection<ChessMove> pM, int nR, int nC, boolean tC) {
+        if (isWithinBounds(nR, nC)) {
+            ChessPosition diagonalPosition = new ChessPosition(nR, nC);
+            checkNewSpacePawn(board, mP, diagonalPosition, pM, false, tC, true);
         }
     }
 
