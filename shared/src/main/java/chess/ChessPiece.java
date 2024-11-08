@@ -113,14 +113,14 @@ public class ChessPiece {
         exploreMovePositions(board, myPosition, possibleMoves, col, row, directions);
     }
 
-    private void exploreMovePositions(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves, int col, int row, int[][] directions) {
-        for (int[] direction : directions) {
-            int newRow = row + direction[0];
-            int newCol = col + direction[1];
+    private void exploreMovePositions(ChessBoard b, ChessPosition mP, Collection<ChessMove> pM, int c, int r, int[][] d) {
+        for (int[] direction : d) {
+            int newRow = r + direction[0];
+            int newCol = c + direction[1];
 
             if (isWithinBounds(newRow, newCol)) {
                 ChessPosition newPosition = new ChessPosition(newRow, newCol);
-                checkNewSpace(board, myPosition, newPosition, possibleMoves);
+                checkNewSpace(b, mP, newPosition, pM);
             }
         }
     }
