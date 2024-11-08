@@ -69,7 +69,6 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> possibleMoves = new HashSet<>();
-
         // switch selection for each type of piece
         // adding new comment to reach minimum commit amount
         switch(this.type) {
@@ -98,28 +97,15 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, int row, int col) {
         Collection<ChessMove> possibleMoves = new HashSet<>();
         ChessPosition myPosition = new ChessPosition(row, col);
-
         // switch selection for each type of piece
         // adding new comment to reach minimum commit amount
-        switch(this.type) {
-            case KING:
-                findKingMoves(board, myPosition, possibleMoves);
-                break;
-            case QUEEN:
-                findQueenMoves(board, myPosition, possibleMoves);
-                break;
-            case BISHOP:
-                findBishopMoves(board, myPosition, possibleMoves);
-                break;
-            case KNIGHT:
-                findKnightMoves(board, myPosition, possibleMoves);
-                break;
-            case ROOK:
-                findRookMoves(board, myPosition, possibleMoves);
-                break;
-            default:
-                findPawnMoves(board, myPosition, possibleMoves);
-
+        switch (this.type) {
+            case KING -> findKingMoves(board, myPosition, possibleMoves);
+            case QUEEN -> findQueenMoves(board, myPosition, possibleMoves);
+            case BISHOP -> findBishopMoves(board, myPosition, possibleMoves);
+            case KNIGHT -> findKnightMoves(board, myPosition, possibleMoves);
+            case ROOK -> findRookMoves(board, myPosition, possibleMoves);
+            default -> findPawnMoves(board, myPosition, possibleMoves);
         }
         return possibleMoves;
     }
@@ -139,6 +125,10 @@ public class ChessPiece {
                 {-1, 1},
         };
 
+        exploreMovePositions(board, myPosition, possibleMoves, col, row, directions);
+    }
+
+    private void exploreMovePositions(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves, int col, int row, int[][] directions) {
         for (int[] direction : directions) {
             int newRow = row + direction[0];
             int newCol = col + direction[1];
@@ -194,25 +184,8 @@ public class ChessPiece {
 
         boolean[] endFound = {false, false, false, false};
 
-        for (int i = 1; i < 9; i++) {
-            for (int j = 0; j < 4; j++) {
-                if (endFound[j]) {continue;}
-
-                int newRow = row + directions[j][0] * i;
-                int newCol = col + directions[j][1] * i;
-
-                if (isWithinBounds(newRow, newCol)) {
-                    ChessPosition newPosition = new ChessPosition(newRow, newCol);
-                    endFound[j] = checkNewSpace(board, myPosition, newPosition, possibleMoves);
-                } else {
-                    endFound[j] = true;
-                }
-            }
-
-            if (allEndsFound(endFound)) {
-                break;
-            }
-        }
+        exploreUnlimitedMovesInDirections(row, col, directions, board,
+                myPosition, possibleMoves, endFound);
     }
 
     void findKnightMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves) {
@@ -223,15 +196,7 @@ public class ChessPiece {
                 {2, -1}, {2, 1}, {1, -2}, {1, 2}, {-1, -2}, {-1, 2}, {-2, -1}, {-2, 1}
         };
 
-        for (int[] move : knightMoves) {
-            int newRow = row + move[0];
-            int newCol = col + move[1];
-
-            if (isWithinBounds(newRow, newCol)) {
-                ChessPosition newPosition = new ChessPosition(newRow, newCol);
-                checkNewSpace(board, myPosition, newPosition, possibleMoves);
-            }
-        }
+        exploreMovePositions(board, myPosition, possibleMoves, col, row, knightMoves);
     }
 
     void findRookMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves) {
@@ -241,25 +206,8 @@ public class ChessPiece {
         int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
         boolean[] endFound = {false, false, false, false};
 
-        for (int i = 1; i < 9; i++) {
-            for (int j = 0; j < 4; j++) {
-                if (endFound[j]) {continue;}
-
-                int newRow = row + directions[j][0] * i;
-                int newCol = col + directions[j][1] * i;
-
-                if (isWithinBounds(newRow, newCol)) {
-                    ChessPosition newPosition = new ChessPosition(newRow, newCol);
-                    endFound[j] = checkNewSpace(board, myPosition, newPosition, possibleMoves);
-                } else {
-                    endFound[j] = true;
-                }
-            }
-
-            if (allEndsFound(endFound)) {
-                break;
-            }
-        }
+        exploreUnlimitedMovesInDirections(row, col, directions, board,
+                myPosition, possibleMoves, endFound);
     }
 
 
@@ -351,6 +299,30 @@ public class ChessPiece {
         possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.BISHOP));
         possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.KNIGHT));
         possibleMoves.add(new ChessMove(myPosition, newPosition, PieceType.ROOK));
+    }
+
+    private void exploreUnlimitedMovesInDirections(int row, int col, int[][] directions, ChessBoard board,
+                                          ChessPosition myPosition, Collection<ChessMove> possibleMoves,
+                                          boolean[] endFound) {
+        for (int i = 1; i < 9; i++) {
+            for (int j = 0; j < 4; j++) {
+                if (endFound[j]) {continue;}
+
+                int newRow = row + directions[j][0] * i;
+                int newCol = col + directions[j][1] * i;
+
+                if (isWithinBounds(newRow, newCol)) {
+                    ChessPosition newPosition = new ChessPosition(newRow, newCol);
+                    endFound[j] = checkNewSpace(board, myPosition, newPosition, possibleMoves);
+                } else {
+                    endFound[j] = true;
+                }
+            }
+
+            if (allEndsFound(endFound)) {
+                break;
+            }
+        }
     }
 
     @Override
