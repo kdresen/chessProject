@@ -1,6 +1,5 @@
 package dataaccess;
-import dataaccess.DataAccessException;
-import dataaccess.SQLDAO.MySQLAuthDAO;
+import dataaccess.sqldao.MySQLAuthDAO;
 import model.AuthData;
 import org.junit.jupiter.api.*;
 
@@ -18,7 +17,7 @@ public class MySQLAuthDAOTests {
     }
 
     @Test
-    void testCreateAuthData_Positive() throws DataAccessException {
+    void testCreateAuthDataPositive() throws DataAccessException {
         AuthData createdAuthData = authDAO.createAuthData(testAuthData);
         assertEquals(testAuthData.authToken(), createdAuthData.authToken(), "AuthToken did not match");
         assertEquals(testAuthData.username(), createdAuthData.username(), "Username did not match");
@@ -28,13 +27,13 @@ public class MySQLAuthDAOTests {
     }
 
     @Test
-    void testCreateAuthData_Negative() throws DataAccessException {
+    void testCreateAuthDataNegative() throws DataAccessException {
         authDAO.createAuthData(testAuthData);
         assertThrows(DataAccessException.class, () -> authDAO.createAuthData(testAuthData), "Should not allow duplicate authTokens");
     }
 
     @Test
-    void testGetAuthData_Positive() throws DataAccessException {
+    void testGetAuthDataPositive() throws DataAccessException {
         authDAO.createAuthData(testAuthData);
 
         AuthData retrievedAuthData = authDAO.getAuthData(testAuthData.authToken());
@@ -44,14 +43,14 @@ public class MySQLAuthDAOTests {
     }
 
     @Test
-    void testGetAuthData_Negative() throws DataAccessException {
+    void testGetAuthDataNegative() throws DataAccessException {
 
         AuthData retrievedAuthData = authDAO.getAuthData("fake authToken");
         assertNull(retrievedAuthData, "getAuthData incorrectly returned an AuthData object");
     }
 
     @Test
-    void testDeleteAuthData_Positive() throws DataAccessException {
+    void testDeleteAuthDataPositive() throws DataAccessException {
         authDAO.createAuthData(testAuthData);
 
         authDAO.deleteAuthData(testAuthData.authToken());
@@ -60,7 +59,7 @@ public class MySQLAuthDAOTests {
     }
 
     @Test
-    void testDeleteAllAuthData_Positive() throws DataAccessException {
+    void testDeleteAllAuthDataPositive() throws DataAccessException {
         authDAO.createAuthData(testAuthData);
 
         authDAO.deleteAllAuthData();

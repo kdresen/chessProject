@@ -1,6 +1,5 @@
 package dataaccess;
-import dataaccess.DataAccessException;
-import dataaccess.SQLDAO.MySQLUserDAO;
+import dataaccess.sqldao.MySQLUserDAO;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,7 +17,7 @@ public class MySQLUserDAOTest {
 
 
     @Test
-    void testCreateUser_Positive() throws DataAccessException {
+    void testCreateUserPositive() throws DataAccessException {
         String createdUsername = userDAO.createUser(testUser);
         assertEquals(testUser.username(), createdUsername, "Created username did not match");
 
@@ -27,7 +26,7 @@ public class MySQLUserDAOTest {
     }
 
     @Test
-    void testCreateUser_Negative() throws DataAccessException {
+    void testCreateUserNegative() throws DataAccessException {
         userDAO.createUser(testUser);
 
         assertThrows(DataAccessException.class, () -> userDAO.createUser(testUser), "Should not create duplicate user");
@@ -35,7 +34,7 @@ public class MySQLUserDAOTest {
     }
 
     @Test
-    void testGetUserByUsername_Positive() throws DataAccessException {
+    void testGetUserByUsernamePositive() throws DataAccessException {
         userDAO.createUser(testUser);
 
         UserData retrievedUser = userDAO.getUserByUsername(testUser.username());
@@ -46,7 +45,7 @@ public class MySQLUserDAOTest {
     }
 
     @Test
-    void testGetUserByUsername_Negative() throws DataAccessException {
+    void testGetUserByUsernameNegative() throws DataAccessException {
         userDAO.createUser(testUser);
 
         UserData retrievedUser = userDAO.getUserByUsername("newUsername");
@@ -54,7 +53,7 @@ public class MySQLUserDAOTest {
     }
 
     @Test
-    void testVerifyUser_Positive() throws DataAccessException {
+    void testVerifyUserPositive() throws DataAccessException {
 
         userDAO.createUser(testUser);
 
@@ -63,7 +62,7 @@ public class MySQLUserDAOTest {
     }
 
     @Test
-    void testVerifyUser_Negative() throws DataAccessException {
+    void testVerifyUserNegative() throws DataAccessException {
         userDAO.createUser(testUser);
 
         boolean isVerified = userDAO.verifyUser(testUser.username(), "invalidPassword");
@@ -74,7 +73,7 @@ public class MySQLUserDAOTest {
     }
 
     @Test
-    void testDeleteAllUsers_Positive() throws DataAccessException {
+    void testDeleteAllUsersPositive() throws DataAccessException {
         userDAO.createUser(testUser);
 
         userDAO.deleteAllUsers();

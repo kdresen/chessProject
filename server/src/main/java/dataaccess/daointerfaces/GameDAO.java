@@ -1,4 +1,4 @@
-package dataaccess.DAOInterfaces;
+package dataaccess.daointerfaces;
 
 import chess.ChessGame;
 import dataaccess.DataAccessException;

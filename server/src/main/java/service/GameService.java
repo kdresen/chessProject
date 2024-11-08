@@ -1,12 +1,12 @@
 package service;
 
-import dataaccess.DAOInterfaces.AuthDAO;
+import dataaccess.daointerfaces.AuthDAO;
 import dataaccess.DataAccessException;
-import dataaccess.DAOInterfaces.GameDAO;
-import dataaccess.MemoryDAO.MemoryAuthDAO;
-import dataaccess.MemoryDAO.MemoryGameDAO;
-import dataaccess.SQLDAO.MySQLAuthDAO;
-import dataaccess.SQLDAO.MySQLGameDAO;
+import dataaccess.daointerfaces.GameDAO;
+import dataaccess.memorydao.MemoryAuthDAO;
+import dataaccess.memorydao.MemoryGameDAO;
+import dataaccess.sqldao.MySQLAuthDAO;
+import dataaccess.sqldao.MySQLGameDAO;
 import model.AuthData;
 import model.GameData;
 import request.CreateGamesRequest;

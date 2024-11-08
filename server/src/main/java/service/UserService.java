@@ -1,12 +1,12 @@
 package service;
 
-import dataaccess.DAOInterfaces.AuthDAO;
+import dataaccess.daointerfaces.AuthDAO;
 import dataaccess.DataAccessException;
-import dataaccess.MemoryDAO.MemoryAuthDAO;
-import dataaccess.MemoryDAO.MemoryUserDAO;
-import dataaccess.SQLDAO.MySQLAuthDAO;
-import dataaccess.SQLDAO.MySQLUserDAO;
-import dataaccess.DAOInterfaces.UserDAO;
+import dataaccess.memorydao.MemoryAuthDAO;
+import dataaccess.memorydao.MemoryUserDAO;
+import dataaccess.sqldao.MySQLAuthDAO;
+import dataaccess.sqldao.MySQLUserDAO;
+import dataaccess.daointerfaces.UserDAO;
 import model.AuthData;
 import model.UserData;
 import request.LoginRequest;
