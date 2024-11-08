@@ -24,15 +24,13 @@ public class MySQLGameDAO implements GameDAO {
     @Override
     public int createGame(String gameName) throws DataAccessException {
         String sql = "INSERT INTO games (whiteUsername, blackUsername, gameName, game) VALUES (?,?,?,?)";
-        String whiteUsername = null;
-        String blackUsername = null;
         ChessGame game = new ChessGame();
 
         try (var conn = DatabaseManager.getConnection();
              var ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            ps.setString(1, whiteUsername);
-            ps.setString(2, blackUsername);
+            ps.setString(1, null);
+            ps.setString(2, null);
             ps.setString(3, gameName);
             var json = new Gson().toJson(game);
             ps.setString(4, json);
