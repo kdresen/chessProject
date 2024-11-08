@@ -8,6 +8,8 @@ import model.AuthData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import static dataaccess.sqldao.DatabaseSetup.configureDatabase;
+
 public class MySQLAuthDAO implements AuthDAO {
 
     public MySQLAuthDAO() {
@@ -80,33 +82,6 @@ public class MySQLAuthDAO implements AuthDAO {
 
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
-        }
-
-    }
-
-
-    private final String[] createStatements = {
-            """
-            CREATE TABLE IF NOT EXISTS auths (
-            `authToken` varchar(255) NOT NULL PRIMARY KEY,
-            `username` varchar(50) NOT NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET= utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-            """
-    };
-
-    private void configureDatabase() {
-
-        try {
-            DatabaseManager.createDatabase();
-            try (var conn = DatabaseManager.getConnection()) {
-                for (var statement : createStatements) {
-                    try (var ps = conn.prepareStatement(statement)) {
-                        ps.executeUpdate();
-                    }
-                }
-            }
-        } catch (SQLException | DataAccessException e) {
-            System.out.printf(e.getMessage());
         }
 
     }

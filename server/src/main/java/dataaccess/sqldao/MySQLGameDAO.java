@@ -13,6 +13,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import static dataaccess.sqldao.DatabaseSetup.configureDatabase;
+
 public class MySQLGameDAO implements GameDAO {
 
     public MySQLGameDAO() {
@@ -151,34 +153,5 @@ public class MySQLGameDAO implements GameDAO {
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
-    }
-
-    private final String[] createStatements = {
-            """
-            CREATE TABLE IF NOT EXISTS games (
-            `gameID` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-            `whiteUsername` varchar(255),
-            `blackUsername` varchar(255),
-            `gameName` varchar(255) NOT NULL,
-            `game` longtext NOT NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET= utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-            """
-    };
-
-    private void configureDatabase() {
-
-        try {
-            DatabaseManager.createDatabase();
-            try (var conn = DatabaseManager.getConnection()) {
-                for (var statement : createStatements) {
-                    try (var ps = conn.prepareStatement(statement)) {
-                        ps.executeUpdate();
-                    }
-                }
-            }
-        } catch (SQLException | DataAccessException e) {
-            System.out.printf(e.getMessage());
-        }
-
     }
 }
