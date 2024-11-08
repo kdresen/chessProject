@@ -1,4 +1,4 @@
-package service;
+package dataaccess;
 import dataaccess.DataAccessException;
 import dataaccess.SQLDAO.MySQLUserDAO;
 import model.UserData;

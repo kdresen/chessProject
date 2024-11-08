@@ -1,4 +1,4 @@
-package service;
+package dataaccess;
 import chess.ChessGame;
 import dataaccess.DataAccessException;
 import dataaccess.SQLDAO.MySQLGameDAO;
