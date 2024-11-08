@@ -196,7 +196,7 @@ public class ChessPiece {
 
         for (int i = 1; i < 9; i++) {
             for (int j = 0; j < 4; j++) {
-                if (endFound[j]) continue;
+                if (endFound[j]) {continue;}
 
                 int newRow = row + directions[j][0] * i;
                 int newCol = col + directions[j][1] * i;
@@ -243,7 +243,7 @@ public class ChessPiece {
 
         for (int i = 1; i < 9; i++) {
             for (int j = 0; j < 4; j++) {
-                if (endFound[j]) continue;
+                if (endFound[j]) {continue;}
 
                 int newRow = row + directions[j][0] * i;
                 int newCol = col + directions[j][1] * i;
@@ -291,7 +291,7 @@ public class ChessPiece {
 
     private boolean allEndsFound(boolean[] endFound) {
         for (boolean end : endFound) {
-            if (!end) return false;
+            if (!end) {return false;}
         }
         return true;
     }
@@ -355,8 +355,8 @@ public class ChessPiece {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {return true;}
+        if (o == null || getClass() != o.getClass()) {return false;}
         ChessPiece that = (ChessPiece) o;
         return pieceColor == that.pieceColor && type == that.type;
     }
