@@ -71,24 +71,17 @@ public class ChessPiece {
         Collection<ChessMove> possibleMoves = new HashSet<>();
         // switch selection for each type of piece
         // adding new comment to reach minimum commit amount
+        return getChessMoves(board, myPosition, possibleMoves);
+    }
+
+    private Collection<ChessMove> getChessMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves) {
         switch(this.type) {
-            case KING:
-                findKingMoves(board, myPosition, possibleMoves);
-                break;
-            case QUEEN:
-                findQueenMoves(board, myPosition, possibleMoves);
-                break;
-            case BISHOP:
-                findBishopMoves(board, myPosition, possibleMoves);
-                break;
-            case KNIGHT:
-                findKnightMoves(board, myPosition, possibleMoves);
-                break;
-            case ROOK:
-                findRookMoves(board, myPosition, possibleMoves);
-                break;
-            default:
-                findPawnMoves(board, myPosition, possibleMoves);
+            case KING -> findKingMoves(board, myPosition, possibleMoves);
+            case QUEEN -> findQueenMoves(board, myPosition, possibleMoves);
+            case BISHOP -> findBishopMoves(board, myPosition, possibleMoves);
+            case KNIGHT -> findKnightMoves(board, myPosition, possibleMoves);
+            case ROOK -> findRookMoves(board, myPosition, possibleMoves);
+            default -> findPawnMoves(board, myPosition, possibleMoves);
 
         }
         return possibleMoves;
@@ -99,15 +92,7 @@ public class ChessPiece {
         ChessPosition myPosition = new ChessPosition(row, col);
         // switch selection for each type of piece
         // adding new comment to reach minimum commit amount
-        switch (this.type) {
-            case KING -> findKingMoves(board, myPosition, possibleMoves);
-            case QUEEN -> findQueenMoves(board, myPosition, possibleMoves);
-            case BISHOP -> findBishopMoves(board, myPosition, possibleMoves);
-            case KNIGHT -> findKnightMoves(board, myPosition, possibleMoves);
-            case ROOK -> findRookMoves(board, myPosition, possibleMoves);
-            default -> findPawnMoves(board, myPosition, possibleMoves);
-        }
-        return possibleMoves;
+        return getChessMoves(board, myPosition, possibleMoves);
     }
 
     void findKingMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves) {
