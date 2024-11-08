@@ -7,7 +7,7 @@ import java.sql.SQLException;
 
 public class DatabaseSetup {
 
-    private static final String[] createStatements = {
+    private static final String[] CREATE_STATEMENTS = {
             """
             CREATE TABLE IF NOT EXISTS users (
             `username` varchar(50) NOT NULL PRIMARY KEY,
@@ -37,7 +37,7 @@ public class DatabaseSetup {
         try {
             DatabaseManager.createDatabase();
             try (var conn = DatabaseManager.getConnection()) {
-                for (var statement : createStatements) {
+                for (var statement : CREATE_STATEMENTS) {
                     try (var ps = conn.prepareStatement(statement)) {
                         ps.executeUpdate();
                     }
