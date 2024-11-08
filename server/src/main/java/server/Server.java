@@ -21,7 +21,7 @@ public class Server {
     private final GameService gameService;
     private final AdminService adminService;
     private final Gson gson = new Gson();
-    static boolean SQL = true;
+    static final boolean SQL = true;
 
 
     public Server() {
