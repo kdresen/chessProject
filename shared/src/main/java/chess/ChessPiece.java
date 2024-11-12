@@ -74,7 +74,8 @@ public class ChessPiece {
         return getChessMoves(board, myPosition, possibleMoves);
     }
 
-    private Collection<ChessMove> getChessMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> possibleMoves) {
+    private Collection<ChessMove> getChessMoves(ChessBoard board, ChessPosition myPosition,
+                                                Collection<ChessMove> possibleMoves) {
         switch(this.type) {
             case KING -> findKingMoves(board, myPosition, possibleMoves);
             case QUEEN -> findQueenMoves(board, myPosition, possibleMoves);
