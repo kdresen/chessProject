@@ -135,8 +135,8 @@ public class Server {
     private Object createGame(Request req, Response res) {
         try {
             GameData newGame = new Gson().fromJson(req.body(), GameData.class);
-            CreateGamesRequest request = new CreateGamesRequest(newGame.gameName(), req.headers("authorization"));
-            CreateGamesResult result = gameService.createGame(request);
+            CreateGamesRequest request = new CreateGamesRequest(newGame.gameName());
+            CreateGamesResult result = gameService.createGame(request, req.headers("authorization"));
             res.status(200);
             return gson.toJson(result);
         } catch (DataAccessException ex) {

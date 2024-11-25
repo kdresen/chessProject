@@ -33,14 +33,14 @@ public class GameService {
         }
     }
 
-    public CreateGamesResult createGame(CreateGamesRequest request) throws DataAccessException {
+    public CreateGamesResult createGame(CreateGamesRequest request, String authToken) throws DataAccessException {
         if (Objects.equals(request, null)) {
             throw new DataAccessException("Error: unauthorized");
         }
-        if (request.gameName() == null || request.authToken() == null || request.authToken().isEmpty() || request.gameName().isEmpty()) {
+        if (request.gameName() == null || authToken == null || authToken.isEmpty() || request.gameName().isEmpty()) {
             throw new DataAccessException("Error: bad request");
         }
-        AuthData authData = authDAO.getAuthData(request.authToken());
+        AuthData authData = authDAO.getAuthData(authToken);
         if (authData == null) {
             throw new DataAccessException("Error: unauthorized");
         }

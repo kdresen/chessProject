@@ -1,11 +1,11 @@
-package server;
+package ui.server;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
 import model.AuthData;
 import exception.ResponseException;
-import model.GameData;
 import model.UserData;
+import request.CreateGamesRequest;
 import request.JoinGameRequest;
 import request.LoginRequest;
 import request.RegisterRequest;
@@ -43,7 +43,7 @@ public class ServerFacade {
 
     public CreateGamesResult createGame(String gameName, String authToken) throws ResponseException {
         var path = "/game";
-        return this.makeRequest("POST", path, gameName, CreateGamesResult.class, authToken);
+        return this.makeRequest("POST", path, new CreateGamesRequest(gameName), CreateGamesResult.class, authToken);
     }
 
     public ListGamesResult listGames(String authToken) throws ResponseException {
