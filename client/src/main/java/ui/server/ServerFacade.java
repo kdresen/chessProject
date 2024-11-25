@@ -36,9 +36,9 @@ public class ServerFacade {
         return this.makeRequest("POST", path, new RegisterRequest(username, password, email), RegisterResult.class, null);
     }
 
-    public Object logoutUser(AuthData authData) throws ResponseException {
+    public Object logoutUser(String authToken) throws ResponseException {
         var path = "/session";
-        return this.makeRequest("DELETE", path, null, null, authData.authToken());
+        return this.makeRequest("DELETE", path, null, null, authToken);
     }
 
     public CreateGamesResult createGame(String gameName, String authToken) throws ResponseException {
@@ -54,6 +54,16 @@ public class ServerFacade {
     public JoinGameResult joinGame(int gameID, ChessGame.TeamColor playerColor, String authToken) throws ResponseException {
         var path = "/game";
         return this.makeRequest("PUT", path, new JoinGameRequest(playerColor, gameID), null, authToken);
+    }
+
+    public Object clearDatabases() {
+        try {
+            var path = "/db";
+            return this.makeRequest("DELETE", path, null, null, null);
+
+        } catch (ResponseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws ResponseException
