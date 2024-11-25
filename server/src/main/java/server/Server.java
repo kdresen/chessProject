@@ -116,8 +116,7 @@ public class Server {
     }
     private Object logoutUser(Request req, Response res) {
         try {
-            LogoutRequest authData = new LogoutRequest(req.headers("authorization"));
-            userService.logout(authData);
+            userService.logout(req.headers("authorization"));
             return gson.toJson(new HashMap<>());
         } catch (DataAccessException ex) {
             return exceptionHandler(ex, req, res);
