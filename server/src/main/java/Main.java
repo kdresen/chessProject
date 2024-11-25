@@ -7,6 +7,6 @@ public class Main {
         System.out.println("♕ 240 Chess Server: " + piece);
 
         Server server = new Server();
-        server.run(3306);
+        server.run(8080);
     }
 }
