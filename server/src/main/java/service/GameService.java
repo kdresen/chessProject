@@ -47,17 +47,17 @@ public class GameService {
         return new CreateGamesResult(gameDAO.createGame(request.gameName()));
     }
 
-    public JoinGameResult joinGame(JoinGameRequest request) throws DataAccessException {
+    public JoinGameResult joinGame(JoinGameRequest request, String authToken) throws DataAccessException {
         if (Objects.equals(request, null)) {
             throw new DataAccessException("Error: bad request");
         }
         if (Objects.equals(request.playerColor(), null)) {
             throw new DataAccessException("Error: bad request");
         }
-        if (request.authToken() == null || request.authToken().isEmpty()) {
+        if (authToken == null || authToken.isEmpty()) {
             throw new DataAccessException("Error: unauthorized");
         }
-        AuthData authData = authDAO.getAuthData(request.authToken());
+        AuthData authData = authDAO.getAuthData(authToken);
         if (authData == null) {
             throw new DataAccessException("Error: unauthorized");
         }

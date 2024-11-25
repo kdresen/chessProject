@@ -146,8 +146,7 @@ public class Server {
     private Object joinGame(Request req, Response res) {
         try {
             JoinGameRequest request = gson.fromJson(req.body(), JoinGameRequest.class);
-            request = request.replaceAuthToken(req.headers("authorization"));
-            JoinGameResult result = gameService.joinGame(request);
+            JoinGameResult result = gameService.joinGame(request, req.headers("authorization"));
             res.status(200);
             return gson.toJson(result);
         } catch (DataAccessException ex) {
