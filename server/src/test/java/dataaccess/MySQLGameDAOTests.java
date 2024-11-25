@@ -23,14 +23,14 @@ public class MySQLGameDAOTests {
     }
 
     @Test
-    void testCreateGamePositive() throws DataAccessException {
+    void testCreateGamePositive() {
         assertNotEquals(0, testGameID, "Game ID should not be zero after creation");
         assertNotNull(testGameData, "Game data should not be null");
         assertEquals("Test Game", testGameData.gameName());
     }
 
     @Test
-    void testCreateGameNegative() throws DataAccessException {
+    void testCreateGameNegative() {
         assertThrows(DataAccessException.class, () -> gameDAO.createGame(null), "Should not be able to create a game with no name");
     }
 

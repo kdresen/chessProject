@@ -21,7 +21,8 @@ public class Repl {
     }
 
     public void run() {
-        System.out.println("Welcome to the Repl Client!");
+        System.out.println("\uD83D\uDC36 Welcome to the Repl Client!");
+        //System.out.println(client.help());
     }
 
 }

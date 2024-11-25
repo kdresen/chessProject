@@ -2,7 +2,6 @@ package ui.server;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import model.AuthData;
 import exception.ResponseException;
 import model.UserData;
 import request.CreateGamesRequest;
@@ -36,9 +35,9 @@ public class ServerFacade {
         return this.makeRequest("POST", path, new RegisterRequest(username, password, email), RegisterResult.class, null);
     }
 
-    public Object logoutUser(String authToken) throws ResponseException {
+    public void logoutUser(String authToken) throws ResponseException {
         var path = "/session";
-        return this.makeRequest("DELETE", path, null, null, authToken);
+        this.makeRequest("DELETE", path, null, null, authToken);
     }
 
     public CreateGamesResult createGame(String gameName, String authToken) throws ResponseException {
@@ -46,20 +45,20 @@ public class ServerFacade {
         return this.makeRequest("POST", path, new CreateGamesRequest(gameName), CreateGamesResult.class, authToken);
     }
 
-    public ListGamesResult listGames(String authToken) throws ResponseException {
+    public void listGames(String authToken) throws ResponseException {
         var path = "/game";
-        return this.makeRequest("GET", path, null, ListGamesResult.class, authToken);
+        this.makeRequest("GET", path, null, ListGamesResult.class, authToken);
     }
 
-    public JoinGameResult joinGame(int gameID, ChessGame.TeamColor playerColor, String authToken) throws ResponseException {
+    public void joinGame(int gameID, ChessGame.TeamColor playerColor, String authToken) throws ResponseException {
         var path = "/game";
-        return this.makeRequest("PUT", path, new JoinGameRequest(playerColor, gameID), null, authToken);
+        this.makeRequest("PUT", path, new JoinGameRequest(playerColor, gameID), null, authToken);
     }
 
-    public Object clearDatabases() {
+    public void clearDatabases() {
         try {
             var path = "/db";
-            return this.makeRequest("DELETE", path, null, null, null);
+            this.makeRequest("DELETE", path, null, null, null);
 
         } catch (ResponseException e) {
             throw new RuntimeException(e);
