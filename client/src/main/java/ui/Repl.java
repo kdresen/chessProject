@@ -1,7 +1,10 @@
 package ui;
 
+import exception.ResponseException;
+
 import java.util.Scanner;
 
+import static java.awt.Color.BLUE;
 import static ui.EscapeSequences.*;
 
 public class Repl {
@@ -22,7 +25,27 @@ public class Repl {
 
     public void run() {
         System.out.println("\uD83D\uDC36 Welcome to the Repl Client!");
-        //System.out.println(client.help());
+        System.out.println(client.help());
+
+        Scanner scanner = new Scanner(System.in);
+        var result = "";
+        while (!result.equals("quit")) {
+            printPrompt();
+            String line = scanner.nextLine();
+
+            try {
+                result = client.eval(line);
+                System.out.println(SET_TEXT_COLOR_BLUE + result);
+            } catch (Throwable e) {
+                var msg = e.toString();
+                System.out.println(msg);
+            }
+        }
+        System.out.println();
+    }
+
+    private void printPrompt() {
+        System.out.println("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 
 }
