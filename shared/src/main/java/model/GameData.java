@@ -4,6 +4,16 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 
 public record GameData(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
+    public String getGameName() {
+        return gameName;
+    }
+    public String getWhiteUsername() {
+        return whiteUsername;
+    }
+    public String getBlackUsername() {
+        return blackUsername;
+    }
+
     public GameData replaceWhiteUsername(String newWhiteUsername) {
         return new GameData(gameID, newWhiteUsername, blackUsername, gameName, game);
     }

@@ -1,14 +1,12 @@
 package ui;
 
-import exception.ResponseException;
-
 import java.util.Scanner;
 
-import static java.awt.Color.BLUE;
 import static ui.EscapeSequences.*;
 
 public class Repl {
-    // just logic of spits out prompt and takes in input and tells client to evaluate the stuff, client does stuff and returns result
+    // just logic of spits out prompt and takes in input and tells client to
+    // evaluate the stuff, client does stuff and returns result
     // all logic handled in the client
     // repl just prints out strings
     // client returns all strings
@@ -18,14 +16,15 @@ public class Repl {
     // switch statement determines how to evaluate it
 
     private final Client client;
+    public State loginState;
 
     public Repl(String serverUrl) {
         client = new Client(serverUrl);
     }
 
     public void run() {
-        System.out.println("\uD83D\uDC36 Welcome to the Repl Client!");
-        System.out.println(client.help());
+
+        System.out.println("♕ Welcome to 240 chess! Type help to get started. ♕");
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
@@ -45,7 +44,8 @@ public class Repl {
     }
 
     private void printPrompt() {
-        System.out.println("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
+        System.out.print("\n" + RESET_TEXT_COLOR + "[" + client.getState()
+                + "] " +  ">>> " + SET_TEXT_COLOR_GREEN);
     }
 
 }
