@@ -198,7 +198,7 @@ public class Client {
     }
 
     private String getGameNameFromIndex(int index) {
-        String gameName = mostRecentGamesList.get(index);
+        return mostRecentGamesList.get(index);
     }
 
     private int getGameIDFromNumber(int gameNumber) {
