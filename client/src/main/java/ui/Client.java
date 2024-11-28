@@ -148,7 +148,10 @@ public class Client {
             return "Successfully created " + params[0];
         }
 
-        return "FIX THIS ERROR HANDLING FOR CREATE GAME"; // TODO
+        return """
+                To create a game, enter: create <GAMENAME> (example: create newgame)
+                No spaces are allowed in game names.
+                """;
     }
     public String listGames(String... params) throws ResponseException {
         assertSignedIn();
@@ -158,6 +161,9 @@ public class Client {
         var smallerResult = result.listGameInfo();
         fullGameList = result.games();
         mostRecentGamesList = smallerResult;
+        if (fullGameList.isEmpty()) {
+            return "No games are available. Type help to get started.";
+        }
 
         StringBuilder output = new StringBuilder();
         for (int i = 0; i < smallerResult.size(); i += 3) {
@@ -179,6 +185,11 @@ public class Client {
         // add check to make sure games list isn't empty
         if (params.length >= 1) {
             ChessGame.TeamColor color;
+            try {
+                int gameID = Integer.parseInt(params[0]);
+            } catch (NumberFormatException ex) {
+                return "Please use the game number to join";
+            }
             int gameNumber = Integer.parseInt(params[0]);
             if (gameNumber == 0 || gameNumber > fullGameList.size()) {
                 return "Please choose a game number from the list";
@@ -199,11 +210,11 @@ public class Client {
             // add the player to the game
             server.joinGame(gameID, color, authToken);
             createChessBoard(game.game(), color);
-            return "Successfully joined " + gameName; // TODO change this to draw the game
+            return "Successfully joined " + gameName;
 
         }
 
-        return "there was the wrong amount of expected parameters"; // TODO
+        return "there was the wrong amount of expected parameters";
     }
     public String observe(String... params) throws ResponseException {
         assertSignedIn();
