@@ -1,13 +1,9 @@
-import chess.*;
 import ui.Repl;
-import ui.server.*;
 
 
 public class Main {
-    static ServerFacade facade;
 
     public static void main(String[] args) {
-        var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         System.out.println("♕ 240 Chess Client: ");
         var serverUrl = "http://localhost:8080";
         if (args.length == 1) {

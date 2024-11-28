@@ -11,12 +11,11 @@ public class Repl {
     // repl just prints out strings
     // client returns all strings
     // run in client starts repl and waits for the state to be quit
-    // if state is quit, ends repl
+    // if state is quit, ends Repl
     // repl takes in input from user and evaluates it
     // switch statement determines how to evaluate it
 
     private final Client client;
-    public State loginState;
 
     public Repl(String serverUrl) {
         client = new Client(serverUrl);

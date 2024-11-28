@@ -9,7 +9,6 @@ import ui.server.ServerFacade;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import ui.EscapeSequences.*;
 
 
 import static ui.DrawChessBoard.createChessBoard;
@@ -21,7 +20,6 @@ public class Client {
 
     private String userName = null;
     private final ServerFacade server;
-    private final String serverUrl;
     private State state = State.SIGNEDOUT;
     private String authToken;
     private List<GameData> fullGameList;
@@ -30,7 +28,6 @@ public class Client {
 
     public Client(String serverUrl) {
         this.server = new ServerFacade(serverUrl);
-        this.serverUrl = serverUrl;
         this.authToken = null;
         this.mostRecentGamesList = null;
         this.fullGameList = null;
@@ -55,11 +52,11 @@ public class Client {
             } else if (state == State.SIGNEDIN) {
                 return switch(cmd) {
                     case "create" -> createGame(params);
-                    case "list" -> listGames(params);
+                    case "list" -> listGames();
                     case "join" -> joinGame(params);
                     case "observe" -> observe(params);
-                    case "logout" -> logout(params);
-                    case "delete" -> admin(params);
+                    case "logout" -> logout();
+                    case "delete" -> admin();
                     case "quit" -> "quit";
                     default -> help();
                 };
@@ -95,7 +92,7 @@ public class Client {
             mostRecentGamesList = newResult.listGameInfo();
             return "Welcome " + userName + ". Type help to get started";
         }
-        return "Incorrect Login Info. example = login james james123! (spaces in usernames and passwords are not allowed)"; // TODO handle errors
+        return "Incorrect Login Info. example = login james james123! (spaces in usernames and passwords are not allowed)";
     }
 
     public String register(String... params) throws ResponseException {
@@ -121,11 +118,9 @@ public class Client {
         To register a new user, enter: register <YOUR USERNAME> <YOUR PASSWORD> <YOUR EMAIL>
         No spaces are allowed in usernames, emails, or passwords.
         """;
-        // TODO handle errors
-
     }
 
-    public String logout(String... params) throws ResponseException {
+    public String logout() throws ResponseException {
         assertSignedIn();
         if (authToken != null) {
             server.logoutUser(authToken);
@@ -149,11 +144,11 @@ public class Client {
         }
 
         return """
-                To create a game, enter: create <GAMENAME> (example: create newgame)
+                To create a game, enter: create <GAME NAME> (example: create new_game)
                 No spaces are allowed in game names.
                 """;
     }
-    public String listGames(String... params) throws ResponseException {
+    public String listGames() throws ResponseException {
         assertSignedIn();
         // get games list
         var result = server.listGames(authToken);
@@ -186,7 +181,7 @@ public class Client {
         if (params.length >= 1) {
             ChessGame.TeamColor color;
             try {
-                int gameID = Integer.parseInt(params[0]);
+                Integer.parseInt(params[0]);
             } catch (NumberFormatException ex) {
                 return "Please use the game number to join";
             }
@@ -227,7 +222,7 @@ public class Client {
         assert game != null;
         createChessBoard(game.game(), ChessGame.TeamColor.WHITE);
 
-        return "Observing " + game.gameName(); // TODO
+        return "Observing " + game.gameName();
     }
 
     private String getGameNameFromIndex(int index) {
@@ -249,7 +244,7 @@ public class Client {
         return game;
     }
 
-    public String admin(String... params) throws ResponseException {
+    public String admin() throws ResponseException {
         assertSignedIn();
         server.clearDatabases();
         state = State.SIGNEDOUT;
