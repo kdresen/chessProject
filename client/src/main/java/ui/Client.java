@@ -6,11 +6,13 @@ import model.GameData;
 import model.UserData;
 import ui.server.ServerFacade;
 
-import java.sql.Array;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
+import ui.EscapeSequences.*;
+
+
+import static ui.DrawChessBoard.createChessBoard;
 
 public class Client {
 
@@ -21,7 +23,6 @@ public class Client {
     private final ServerFacade server;
     private final String serverUrl;
     private State state = State.SIGNEDOUT;
-    private State inGame = State.SIGNEDOUT;
     private String authToken;
     private List<GameData> fullGameList;
     private List<String> mostRecentGamesList;
@@ -74,37 +75,52 @@ public class Client {
     }
 
     public String login(String... params) throws ResponseException {
-        if (params.length >= 1) {
+        if (params.length == 2) {
             // call the login function from server facade
-            var result = server.loginUser(new UserData(params[0], params[1], null));
-            System.out.println(result);
-            authToken = result.authToken();
+            try {
+                var result = server.loginUser(new UserData(params[0], params[1], null));
+                userName = result.username();
+                authToken = result.authToken();
+            } catch (ResponseException ex) {
+                return "Incorrect Login or Password";
+            }
+
+
+
             state = State.SIGNEDIN;
-            userName = params[0];
+
             // get the game list for joining games
             var newResult = server.listGames(authToken);
             fullGameList = newResult.games();
             mostRecentGamesList = newResult.listGameInfo();
-            return "Successfully logged in.";
+            return "Welcome " + userName + ". Type help to get started";
         }
-        return "something went wrong"; // TODO handle errors
+        return "Incorrect Login Info. example = login james james123! (spaces in usernames and passwords are not allowed)"; // TODO handle errors
     }
 
     public String register(String... params) throws ResponseException {
         if (params.length == 3) {
             // call the login function from server facade
-            var result = server.registerUser(params[0], params[1], params[2]);
-            System.out.println(result);
-            // save auth
-            authToken = result.authToken();
+            try {
+                var result = server.registerUser(params[0], params[1], params[2]);
+                // save auth
+                authToken = result.authToken();
+                userName = result.username();
+            } catch (ResponseException ex) {
+                return "Username is unavailable. Please try another username.";
+            }
+
             state = State.SIGNEDIN;
             // get the games list for joining games
             var newResult = server.listGames(authToken);
             fullGameList = newResult.games();
             mostRecentGamesList = newResult.listGameInfo();
-            return "Successfully registered.";
+            return "Welcome " + userName + ". Type help to get started.";
         }
-        return "To register a new user, enter \"register YOUR USERNAME YOUR PASSWORD YOUR EMAIL\"";
+        return """
+        To register a new user, enter: register <YOUR USERNAME> <YOUR PASSWORD> <YOUR EMAIL>
+        No spaces are allowed in usernames, emails, or passwords.
+        """;
         // TODO handle errors
 
     }
@@ -115,18 +131,17 @@ public class Client {
             server.logoutUser(authToken);
             authToken = null;
             userName = null;
-            inGame = State.CHESSGAME;
+            state = State.SIGNEDOUT;
             return "Successfully logged out.";
         }
 
 
-        return "fix this error handling idiot."; // TODO
+        return "I don't even know how you got here LOL.";
     }
     public String createGame(String... params) throws ResponseException {
         assertSignedIn();
         if (params.length == 1) {
-            var result = server.createGame(params[0], authToken);
-            System.out.println(result);
+            server.createGame(params[0], authToken);
             var newResult = server.listGames(authToken);
             fullGameList = newResult.games();
             mostRecentGamesList = newResult.listGameInfo();
@@ -139,8 +154,6 @@ public class Client {
         assertSignedIn();
         // get games list
         var result = server.listGames(authToken);
-
-        System.out.println(result);
 
         var smallerResult = result.listGameInfo();
         fullGameList = result.games();
@@ -167,7 +180,12 @@ public class Client {
         if (params.length >= 1) {
             ChessGame.TeamColor color;
             int gameNumber = Integer.parseInt(params[0]);
-            int gameID = getGameIDFromNumber(gameNumber);
+            if (gameNumber == 0 || gameNumber > fullGameList.size()) {
+                return "Please choose a game number from the list";
+            }
+            GameData game = getGameFromNumber(gameNumber);
+            assert game != null;
+            int gameID = game.gameID();
             String gameName = getGameNameFromIndex(gameNumber);
 
             // get the player color
@@ -180,6 +198,7 @@ public class Client {
 
             // add the player to the game
             server.joinGame(gameID, color, authToken);
+            createChessBoard(game.game(), color);
             return "Successfully joined " + gameName; // TODO change this to draw the game
 
         }
@@ -188,23 +207,26 @@ public class Client {
     }
     public String observe(String... params) throws ResponseException {
         assertSignedIn();
-
-        int gameID = getGameIDFromNumber(Integer.parseInt(params[0]));
+        if (Integer.parseInt(params[0]) == 0 || Integer.parseInt(params[0]) > fullGameList.size()) {
+            return "Please choose a game number from the list";
+        }
+        GameData game = getGameFromNumber(Integer.parseInt(params[0]));
 
         // draw the game
+        assert game != null;
+        createChessBoard(game.game(), ChessGame.TeamColor.WHITE);
 
-
-        return null; // TODO
+        return "Observing " + game.gameName(); // TODO
     }
 
     private String getGameNameFromIndex(int index) {
         return mostRecentGamesList.get(index);
     }
 
-    private int getGameIDFromNumber(int gameNumber) {
+    private GameData getGameFromNumber(int gameNumber) {
         int gameIndex = (gameNumber - 1) * 3;
         if (gameIndex < 0 || gameIndex >= mostRecentGamesList.size()) {
-            return 0;
+            return null;
         }
         // get the gameName
         String gameName = getGameNameFromIndex(gameIndex);
@@ -213,31 +235,32 @@ public class Client {
                 .findFirst().orElse(null);
         assert game != null;
 
-        return game.gameID();
+        return game;
     }
 
     public String admin(String... params) throws ResponseException {
         assertSignedIn();
         server.clearDatabases();
+        state = State.SIGNEDOUT;
         return "deleted stuff";
     }
 
     public String help() {
         if (state == State.SIGNEDOUT) {
             return """
-                        register <USERNAME> <PASSWORD> <EMAIL> - to create an account
-                        login <USERNAME> <PASSWORD> - to play chess
-                        quit - playing chess
-                        help - with possible commands
+                        register a new user:    register <USERNAME> <PASSWORD> <EMAIL>
+                        login to your account:  login <USERNAME> <PASSWORD>
+                        quit:                   quit
+                        help:                   help
                     """;
         }
         return """
-                    create a game: <NAME> "new_game"
-                    list all games: "list"
-                    join a game: "join" <GAME NUMBER> "1" <COLOR> "w" or "b"
-                    observe a game: <GAME NUMBER> "1"
-                    logout: "logout"
-                    help: "help"
+                    create a game:      create <NAME>                               (example: create new_game)
+                    list all games:     list
+                    join a game:        join <GAME NUMBER> <COLOR> [w|b]            (example: join 1 w)
+                    observe a game:     observe <GAME NUMBER>                       (example: observe 1)
+                    logout:             logout
+                    help:               help
                 """;
     }
 
