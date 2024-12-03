@@ -220,7 +220,14 @@ public class Client {
         return "Please enter the game number and team color (example: join 1 w) \n To view the list of games, enter \"list\"";
     }
     public String observe(String... params) throws ResponseException {
-        assertSignedIn();
+        try {
+            assertSignedIn();
+        } catch (ResponseException ex) {
+            int statusCode = ex.getStatusCode();
+            if (statusCode == 401) {
+                return "Unauthorized";
+            }
+        }
         if (Integer.parseInt(params[0]) == 0 || Integer.parseInt(params[0]) > fullGameList.size()) {
             return "Please choose a game number from the list";
         }

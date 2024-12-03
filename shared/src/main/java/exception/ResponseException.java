@@ -9,7 +9,7 @@ public class ResponseException extends Exception {
         this.statusCode = statusCode;
     }
 
-    public int StatusCode() {
+    public int getStatusCode() {
         return statusCode;
     }
 }
