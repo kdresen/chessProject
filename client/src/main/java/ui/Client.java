@@ -184,6 +184,9 @@ public class Client {
         assertSignedIn();
         // add check to make sure games list isn't empty
         if (params.length >= 1) {
+            if (params.length == 1) {
+                return "Please enter the game number and team color (example: join 1 w)";
+            }
             ChessGame.TeamColor color;
             try {
                 Integer.parseInt(params[0]);
@@ -204,7 +207,7 @@ public class Client {
             if (Objects.equals(chosenColor, "w") || Objects.equals(chosenColor, "b")) {
                 color = Objects.equals(chosenColor, "w") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
             } else {
-                return "Please choose a color from the provided options";
+                return "Please choose a color from the provided options \nThe available options are w or b";
             }
 
             // add the player to the game
@@ -214,7 +217,7 @@ public class Client {
 
         }
 
-        return "there was the wrong amount of expected parameters";
+        return "Please enter the game number and team color (example: join 1 w) \n To view the list of games, enter \"list\"";
     }
     public String observe(String... params) throws ResponseException {
         assertSignedIn();

@@ -44,6 +44,13 @@ public class ServerFacadeTests {
     }
 
     @Test
+    public void clearPositive() throws Exception {
+        facade.registerUser("player1", "password", "email");
+        facade.clearDatabases();
+        assertDoesNotThrow(() -> facade.registerUser("player1", "password", "email"));
+    }
+
+    @Test
     public void registerPositive() throws Exception {
         var authData = facade.registerUser("player1", "password", "email");
         assertTrue(authData.authToken().length() > 10);
