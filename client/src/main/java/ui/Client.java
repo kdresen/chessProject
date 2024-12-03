@@ -123,7 +123,12 @@ public class Client {
     public String logout() throws ResponseException {
         assertSignedIn();
         if (authToken != null) {
-            server.logoutUser(authToken);
+            try {
+                server.logoutUser(authToken);
+            } catch (ResponseException ex) {
+                return ex.getMessage();
+            }
+
             authToken = null;
             userName = null;
             state = State.SIGNEDOUT;
@@ -131,7 +136,7 @@ public class Client {
         }
 
 
-        return "I don't even know how you got here LOL.";
+        return "You must be logged in to logout.";
     }
     public String createGame(String... params) throws ResponseException {
         assertSignedIn();
