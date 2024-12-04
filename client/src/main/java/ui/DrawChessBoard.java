@@ -49,11 +49,19 @@ public class DrawChessBoard {
     private static void drawHeaders(PrintStream out) {
         setGray(out);
         out.print("   "); // padding for row numbers.
-        for (char  file = 'A'; file <= 'H'; file++) {
+        if (playerColor == ChessGame.TeamColor.BLACK) {
+            for (char file = 'H'; file >= 'A'; file--) {
+                out.print(" ");
+                out.print(file);
+                out.print(" ");
+            }
+        } else {
+            for (char file = 'A'; file <= 'H'; file++) {
 
-            out.print(" ");
-            out.print(file);
-            out.print(" ");
+                out.print(" ");
+                out.print(file);
+                out.print(" ");
+            }
         }
         out.print("   ");
         out.print(RESET_BG_COLOR);
