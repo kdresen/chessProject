@@ -211,7 +211,20 @@ public class Client {
             }
 
             // add the player to the game
-            server.joinGame(gameID, color, authToken);
+            try {
+                server.joinGame(gameID, color, authToken);
+            } catch (ResponseException ex) {
+                if (ex.getStatusCode() == 403) {
+                    return "This color is already taken, please choose another, or create a new game.";
+                }
+                if (ex.getStatusCode() == 401) {
+                    return "Please logout and log in again.";
+                }
+                if (ex.getStatusCode() == 500) {
+                    return "Unable to contact server, please try again later.";
+                }
+            }
+
             createChessBoard(game.game(), color);
             return "Successfully joined " + gameName;
 
