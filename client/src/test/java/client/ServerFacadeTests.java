@@ -7,7 +7,7 @@ import org.junit.jupiter.api.*;
 import result.CreateGamesResult;
 import result.RegisterResult;
 import server.Server;
-import ui.server.ServerFacade;
+import server.ServerFacade;
 
 import static chess.ChessGame.TeamColor.WHITE;
 import static org.junit.jupiter.api.Assertions.*;

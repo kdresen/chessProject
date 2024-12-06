@@ -1,4 +1,4 @@
-package ui.server;
+package server;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
