@@ -20,6 +20,10 @@ public record GameData(int gameID, String whiteUsername, String blackUsername, S
     public GameData replaceBlackUsername(String newBlackUsername) {
         return new GameData(gameID, whiteUsername, newBlackUsername, gameName, game);
     }
+
+    public GameData replaceGame(ChessGame newGame) {
+        return new GameData(gameID, whiteUsername, blackUsername, gameName, newGame);
+    }
     public String toString() {
         return new Gson().toJson(this);
     }

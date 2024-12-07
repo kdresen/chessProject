@@ -7,9 +7,7 @@ import dataaccess.DatabaseManager;
 import dataaccess.daointerfaces.GameDAO;
 import model.GameData;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -120,6 +118,19 @@ public class MySQLGameDAO implements GameDAO {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void updateChessGame(ChessGame game, Integer gameID) throws DataAccessException {
+        String sql = "UPDATE games SET gameName = ? WHERE gameID = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            String gameJson = new Gson().toJson(game);
+            ps.setString(1, gameJson);
+            ps.setInt(2, gameID);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Error updating game: " + e.getMessage());
         }
     }
 
