@@ -50,13 +50,13 @@ public class DrawChessBoard {
         setGray(out);
         out.print("   "); // padding for row numbers.
         if (playerColor == ChessGame.TeamColor.BLACK) {
-            for (char file = 'H'; file >= 'A'; file--) {
+            for (char file = 'h'; file >= 'a'; file--) {
                 out.print(" ");
                 out.print(file);
                 out.print(" ");
             }
         } else {
-            for (char file = 'A'; file <= 'H'; file++) {
+            for (char file = 'a'; file <= 'h'; file++) {
 
                 out.print(" ");
                 out.print(file);

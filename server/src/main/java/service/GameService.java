@@ -83,4 +83,8 @@ public class GameService {
         List<GameData> result = gameDAO.getAllGames();
         return new ListGamesResult(result);
     }
+
+    public GameData getGameByID(int gameID) throws DataAccessException {
+        return gameDAO.getGameByID(gameID);
+    }
 }

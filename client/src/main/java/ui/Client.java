@@ -1,13 +1,11 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessPosition;
 import exception.ResponseException;
 import model.GameData;
 import model.UserData;
-import server.ServerFacade;
-import chess.ChessMove;
-import websocket.messages.ServerMessage;
-import websocket.commands.*;
+import ui.server.ServerFacade;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +25,9 @@ public class Client {
     private String authToken;
     private List<GameData> fullGameList;
     private List<String> mostRecentGamesList;
+    ChessGame currentGame;
+    private ChessGame.TeamColor clientColor;
+    public static DrawChessBoard drawChessBoard;
 
 
     public Client(String serverUrl) {
@@ -34,6 +35,8 @@ public class Client {
         this.authToken = null;
         this.mostRecentGamesList = null;
         this.fullGameList = null;
+        this.currentGame = null;
+        this.clientColor = null;
     }
 
     public State getState() {
@@ -63,11 +66,18 @@ public class Client {
                     case "quit" -> "quit";
                     default -> help();
                 };
-            } else {
+            } else if (state == State.INGAME){
                 return switch(cmd) {
+                    case "redraw" -> redraw();
+                    case "show" -> show(params);
+                    case "move" -> makeMove(params);
+                    case "leave" -> leaveGame();
+                    case "resign" -> resignGame();
                     case "quit" -> "quit";
                     default -> help();
                 };
+            } else {
+                return leaveObserver();
             }
         } catch (ResponseException ex) {
             return ex.getMessage();
@@ -227,8 +237,10 @@ public class Client {
                     return "Unable to contact server, please try again later.";
                 }
             }
-
+            clientColor = color;
+            currentGame = game.game();
             createChessBoard(game.game(), color);
+            state = State.INGAME;
             return "Successfully joined " + gameName;
 
         }
@@ -251,13 +263,87 @@ public class Client {
 
         // draw the game
         assert game != null;
+        clientColor = ChessGame.TeamColor.WHITE;
+        currentGame = game.game();
         createChessBoard(game.game(), ChessGame.TeamColor.WHITE);
 
         return "Observing " + game.gameName();
     }
 
+
+
+    // In Game Commands
+
+    public String redraw() throws ResponseException {
+        try {
+            assertInGame();
+        } catch (ResponseException ex) {
+            int statusCode = ex.getStatusCode();
+            if (statusCode == 401) {
+                return "Unauthorized";
+            }
+        }
+        // draw the game board from the client's saved color
+        createChessBoard(currentGame, clientColor);
+
+        return "Board updated";
+    }
+
+    public String show(String... params) throws ResponseException {
+        // prints out the board but with highlighted spaces for legal moves
+        assertInGame();
+
+        if (params.length == 1 && params[0].matches("[a-h][1-8]")) {
+            ChessPosition position = new ChessPosition(params[0].charAt(0) - '0', params[0].charAt(0) - ('a'-1));
+        }
+
+        return null;
+    }
+
+    public String makeMove(String... params) throws ResponseException {
+        // updates ChessGame in the database with the new position of the piece
+        assertInGame();
+
+        return null;
+    }
+
+    public String leaveGame(String... params) throws ResponseException {
+        assertInGame();
+
+        // leave the game
+
+        return null;
+    }
+
+    public String leaveObserver(String... params) throws ResponseException {
+        // leave the game as observer
+
+        state = State.SIGNEDIN;
+
+        return "Left Game";
+    }
+
+    public String resignGame(String... params) throws ResponseException {
+        assertInGame();
+        // get confirmation
+
+        // resign the game
+
+        // game is over, but doesn't force user to leave game
+
+        return null;
+    }
+
+
+
+
+
     private String getGameNameFromIndex(int index) {
         return mostRecentGamesList.get(index);
+    }
+
+    public void updateCurrentGame(GameData game) {
+        currentGame = game.game();
     }
 
     private GameData getGameFromNumber(int gameNumber) {
@@ -283,7 +369,26 @@ public class Client {
     }
 
     public String help() {
-        if (state == State.SIGNEDOUT) {
+        if (state == State.INGAME) {
+            return """
+                        redraw chess board:     redraw
+                        show legal moves;       show <PIECE POSITION>       (example: e6)
+                        make a move:            move <NEW POSITION>         (example: e6)
+                        leave the game:         leave
+                        resign the game:        resign
+                    """;
+        }
+        else if (state == State.SIGNEDIN) {
+            return """
+                        create a game:      create <NAME>                               (example: create new_game)
+                        list all games:     list
+                        join a game:        join <GAME NUMBER> <COLOR> [w|b]            (example: join 1 w)
+                        observe a game:     observe <GAME NUMBER>                       (example: observe 1)
+                        logout:             logout
+                        help:               help
+                    """;
+        }
+        else if (state == State.SIGNEDOUT) {
             return """
                         register a new user:    register <USERNAME> <PASSWORD> <EMAIL>
                         login to your account:  login <USERNAME> <PASSWORD>
@@ -291,19 +396,22 @@ public class Client {
                         help:                   help
                     """;
         }
-        return """
-                    create a game:      create <NAME>                               (example: create new_game)
-                    list all games:     list
-                    join a game:        join <GAME NUMBER> <COLOR> [w|b]            (example: join 1 w)
-                    observe a game:     observe <GAME NUMBER>                       (example: observe 1)
-                    logout:             logout
-                    help:               help
-                """;
+        else {
+            return """
+                        leave game:             leave
+                    """;
+        }
     }
 
     private void assertSignedIn() throws ResponseException {
         if (state == State.SIGNEDOUT) {
             throw new ResponseException(400, "You must sign in");
+        }
+    }
+
+    private void assertInGame() throws ResponseException {
+        if (state == State.INGAME) {
+            throw new ResponseException(400, "Please Join A Game To Make this Command");
         }
     }
 

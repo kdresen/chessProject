@@ -15,6 +15,7 @@ public class ChessGame {
     private ChessBoard currentBoard;
 
     private ChessBoard clonedBoard;
+    private boolean gameOver;
 
 
 
@@ -265,6 +266,14 @@ public class ChessGame {
             }
         }
         return null;
+    }
+
+    public void setGameOver(boolean gameOver) {
+        this.gameOver = gameOver;
+    }
+
+    public boolean getGameOver() {
+        return gameOver;
     }
 
 }

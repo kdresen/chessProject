@@ -1,6 +1,7 @@
-package server;
+package ui.server;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.UserData;
@@ -9,6 +10,11 @@ import request.JoinGameRequest;
 import request.LoginRequest;
 import request.RegisterRequest;
 import result.*;
+import ui.websocket.WebsocketCommunicator;
+import websocket.commands.JoinPlayer;
+import websocket.commands.LeaveGameCommand;
+import websocket.commands.MakeMoveCommand;
+import websocket.commands.UserGameCommand;
 
 import java.io.*;
 import java.net.*;
@@ -17,10 +23,23 @@ import java.net.*;
 //
 
 public class ServerFacade {
-
     private final String serverUrl;
+    WebsocketCommunicator ws;
+    String authToken;
 
-    public ServerFacade(String url) {serverUrl = url;}
+
+
+    public ServerFacade(String url) {
+        serverUrl = url;
+    }
+
+    private String getAuthToken() {
+        return authToken;
+    }
+
+    private void setAuthToken(String authToken) {
+        this.authToken = authToken;
+    }
 
     // http.setRequestProperty for setting authorization
 
@@ -55,6 +74,41 @@ public class ServerFacade {
         var path = "/game";
         this.makeRequest("PUT", path, new JoinGameRequest(playerColor, gameID), null, authToken);
     }
+
+    public void connectWS() {
+        try {
+            ws = new WebsocketCommunicator(serverUrl);
+        } catch (Exception e) {
+            System.out.println("Failed to make connection with server");
+        }
+    }
+
+    public void sendCommand(UserGameCommand command) {
+        String message = new Gson().toJson(command);
+        ws.sendMessage(message);
+    }
+
+    public void joinPlayer(int gameID, ChessGame.TeamColor playerColor, String authToken) throws ResponseException {
+        sendCommand(new JoinPlayer(UserGameCommand.CommandType.CONNECT, authToken, gameID, playerColor));
+    }
+
+    public void joinObserver(int gameID) {
+        sendCommand(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID));
+    }
+
+    public void makeMove(int gameID, ChessMove move) {
+        sendCommand(new MakeMoveCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID, move));
+    }
+
+    public void leave(int gameID) {
+        sendCommand(new LeaveGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID));
+    }
+
+    public void resign(int gameID) {
+        sendCommand(new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID));
+    }
+
+
 
     public void clearDatabases() {
         try {

@@ -76,5 +76,9 @@ public class UserService {
 
     }
 
+    public AuthData getAuthData(String authToken) throws DataAccessException {
+        return authDAO.getAuthData(authToken);
+    }
+
 
 }

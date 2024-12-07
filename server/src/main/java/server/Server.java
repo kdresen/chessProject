@@ -20,26 +20,27 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Server {
-    private final UserService userService;
-    private final GameService gameService;
-    private final AdminService adminService;
+    public static UserService userService;
+    public static GameService gameService;
+    public static AdminService adminService;
     private final Gson gson = new Gson();
     static final boolean SQL = true;
 
     public static ConcurrentHashMap<Session, Integer> gameSessions = new ConcurrentHashMap<>();
 
-    public Server() {
+    static {
         if (SQL) {
-            this.userService = new UserService(true);
-            this.gameService = new GameService(true);
-            this.adminService = new AdminService(true);
+            userService = new UserService(true);
+            gameService = new GameService(true);
+            adminService = new AdminService(true);
         } else {
-            this.userService = new UserService(false);
-            this.gameService = new GameService(false);
-            this.adminService = new AdminService(false);
+            userService = new UserService(false);
+            gameService = new GameService(false);
+            adminService = new AdminService(false);
         }
-
     }
+
+    public Server() {}
 
 
     public int run(int desiredPort) {

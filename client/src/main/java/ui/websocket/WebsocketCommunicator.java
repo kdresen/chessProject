@@ -8,10 +8,9 @@ import com.google.gson.Gson;
 
 import exception.ResponseException;
 import ui.DrawChessBoard;
-import websocket.*;
+import ui.Client;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
-import websocket.messages.ServerMessage;
 import websocket.messages.NotificationMessage;
 
 import java.net.URI;
@@ -19,16 +18,15 @@ import java.net.URISyntaxException;
 
 import static ui.EscapeSequences.*;
 
-public class WebSocketFacade extends Endpoint {
+public class WebsocketCommunicator extends Endpoint {
 
     Session session;
     ServerMessageHandler serverMessageHandler;
 
-    public WebSocketFacade(String url, ServerMessageHandler serverMessageHandler) throws Exception {
+    public WebsocketCommunicator(String url) throws Exception {
         try {
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/ws");
-            this.serverMessageHandler = serverMessageHandler;
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
