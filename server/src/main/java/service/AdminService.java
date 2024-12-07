@@ -17,17 +17,13 @@ public class AdminService {
     private final GameDAO gameDAO;
 
 
-    public AdminService(boolean isSQL) {
+    public AdminService(UserDAO userDAO, AuthDAO authDAO, GameDAO gameDAO) {
 
-        if (isSQL) {
-            this.userDAO = new MySQLUserDAO();
-            this.authDAO = new MySQLAuthDAO();
-            this.gameDAO = new MySQLGameDAO();
-        } else {
-            this.userDAO = MemoryUserDAO.getInstance();
-            this.authDAO = MemoryAuthDAO.getInstance();
-            this.gameDAO = MemoryGameDAO.getInstance();
-        }
+
+        this.userDAO = userDAO;
+        this.authDAO = authDAO;
+        this.gameDAO = gameDAO;
+
 
     }
 

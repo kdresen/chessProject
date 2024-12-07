@@ -23,14 +23,11 @@ public class GameService {
     private final GameDAO gameDAO;
     private final AuthDAO authDAO;
 
-    public GameService(boolean isSQL) {
-        if (isSQL) {
-            this.gameDAO = new MySQLGameDAO();
-            this.authDAO = new MySQLAuthDAO();
-        } else {
-            this.gameDAO = MemoryGameDAO.getInstance();
-            this.authDAO = MemoryAuthDAO.getInstance();
-        }
+    public GameService(GameDAO gameDAO, AuthDAO authDAO) {
+
+        this.gameDAO = gameDAO;
+        this.authDAO = authDAO;
+
     }
 
     public CreateGamesResult createGame(CreateGamesRequest request, String authToken) throws DataAccessException {

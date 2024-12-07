@@ -4,6 +4,12 @@ import com.google.gson.Gson;
 
 import dataaccess.DataAccessException;
 
+import dataaccess.daointerfaces.AuthDAO;
+import dataaccess.daointerfaces.GameDAO;
+import dataaccess.daointerfaces.UserDAO;
+import dataaccess.sqldao.MySQLAuthDAO;
+import dataaccess.sqldao.MySQLGameDAO;
+import dataaccess.sqldao.MySQLUserDAO;
 import model.GameData;
 import model.UserData;
 import request.*;
@@ -20,24 +26,16 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Server {
-    public static UserService userService;
-    public static GameService gameService;
-    public static AdminService adminService;
+    public UserService userService;
+    public GameService gameService;
+    public AdminService adminService;
     private final Gson gson = new Gson();
     static final boolean SQL = true;
 
     public static ConcurrentHashMap<Session, Integer> gameSessions = new ConcurrentHashMap<>();
 
     static {
-        if (SQL) {
-            userService = new UserService(true);
-            gameService = new GameService(true);
-            adminService = new AdminService(true);
-        } else {
-            userService = new UserService(false);
-            gameService = new GameService(false);
-            adminService = new AdminService(false);
-        }
+
     }
 
     public Server() {}
@@ -46,10 +44,21 @@ public class Server {
     public int run(int desiredPort) {
 
 
+        UserDAO userDAO = new MySQLUserDAO();
+        AuthDAO authDAO = new MySQLAuthDAO();
+        GameDAO gameDAO = new MySQLGameDAO();
+
+
+        userService = new UserService(userDAO, authDAO);
+        gameService = new GameService(gameDAO, authDAO);
+        adminService = new AdminService(userDAO, authDAO, gameDAO);
+
+
+
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
-        Spark.webSocket("/ws", WebSocketHandler.class);
+        Spark.webSocket("/ws", new WebSocketHandler(authDAO, userDAO, gameDAO));
 
         Spark.notFound("<html><body>My custom 404 page</body></html>");
 

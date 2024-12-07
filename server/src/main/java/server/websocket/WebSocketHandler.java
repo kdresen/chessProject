@@ -1,6 +1,7 @@
 package server.websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.daointerfaces.*;
@@ -8,163 +9,176 @@ import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
-import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import org.eclipse.jetty.websocket.api.annotations.*;
+
 import server.Server;
 import websocket.commands.*;
 import websocket.messages.*;
 
 import java.io.IOException;
-import java.util.Objects;
-import java.util.Timer;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 //import static server.Server.gameSessions;
 
 @WebSocket
 public class WebSocketHandler {
-    private final ConnectionManager myConnections = new ConnectionManager();
+    private UserDAO userDAO;
+    private GameDAO gameDAO;
+    private AuthDAO authDAO;
+    private static final Map<Integer, List<Session>> CONNECTIONS = new HashMap<>();
 
-    @OnWebSocketConnect
-    public void onConnect(Session session) throws Exception {
-//        gameSessions.put(session, 0);
-        System.out.println("WebSocket connected: " + session);
-        myConnections.addSession("test", session);
+    public WebSocketHandler(AuthDAO authDAO, UserDAO userDAO, GameDAO gameDAO) {
+        this.userDAO = userDAO;
+        this.gameDAO = gameDAO;
+        this.authDAO = authDAO;
     }
 
-    @OnWebSocketClose
-    public void onClose(Session session, int statusCode, String reason) {
-
+    @OnWebSocketConnect
+    public void onOpen(Session session) throws Exception {
+        System.out.println("WebSocket connected: " + session);
     }
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws IOException {
-        System.out.printf("Received: %s\n", message);
+        System.out.println("New message: " + message + "\n");
 
-        // connect to game with connect command
-        if (message.contains("\"commandType\":\"CONNECT\"")) {
-            JoinPlayer command = new Gson().fromJson(message, JoinPlayer.class);
-//            gameSessions.replace(session, command.getGameID());
-            handleJoinPlayer(session, new JoinPlayer(command.getCommandType(), command.getAuthToken(), command.getGameID(), command.getTeamColor()));
-        }
-        else if (message.contains("\"commmandType\":\"MAKE_MOVE")) {
+        if (message.contains("MAKE_MOVE")) {
             MakeMoveCommand command = new Gson().fromJson(message, MakeMoveCommand.class);
-            handleMakeMove(session, command);
+            try {
+                handleMakeMove(session, command);
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+            return;
         }
-    }
-
-    private void handleJoinPlayer(Session session, JoinPlayer command) throws IOException {
-
+        UserGameCommand command = parseCommand(message);
         try {
-            AuthData auth = server.Server.userService.getAuthData(command.getAuthToken());
-            GameData game = server.Server.gameService.getGameByID(command.getGameID());
-
-            // TODO add functionality for observer if command.getTeamColor() is null
-
-            ChessGame.TeamColor joiningColor = command.getTeamColor().toString().equalsIgnoreCase("white") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
-
-            boolean correctColor;
-            if (joiningColor == ChessGame.TeamColor.WHITE) {
-                correctColor = Objects.equals(game.whiteUsername(), auth.username());
-            }
-            else {
-                correctColor = Objects.equals(game.blackUsername(), auth.username());
-            }
-
-            if (!correctColor) {
-                ErrorMessage error = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: attempting to join with wrong color");
-                handleError(session, error);
-                return;
-            }
-
-            NotificationMessage notif = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,auth.username() + " has joined the game as " + command.getTeamColor().toString());
-            broadcastMessage(session, notif);
-
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+            handleCommand(command, session);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 
-    public void handleMakeMove(Session session, MakeMoveCommand command) throws IOException {
+    private UserGameCommand parseCommand(String message) {
+        return new Gson().fromJson(message, UserGameCommand.class);
+    }
+
+    private void handleCommand(UserGameCommand command, Session session) throws DataAccessException {
+        // handle CONNECT, MAKE_MOVE, LEAVE, and RESIGN commands
+        switch (command.getCommandType()) {
+            case CONNECT:
+                handleConnect(session, command);
+                break;
+            case LEAVE:
+                handleLeave(session, command);
+                break;
+            case RESIGN:
+                handleResign(session, command);
+                break;
+            default:
+                System.out.println("Unknown command type: " + command.getCommandType());
+                break;
+
+        }
+    }
+
+    private void handleConnect(Session session, UserGameCommand command) throws DataAccessException {
+        Integer gameID = command.getGameID();
+        String authToken = command.getAuthToken();
+        String username = authDAO.getAuthData(authToken).username();
+        GameData gameData = gameDAO.getGameByID(gameID);
+
+        if (Objects.equals(authToken, null)) {
+            System.out.println("User not found.");
+            ErrorMessage error = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "invalid authToken");
+            String json = new Gson().toJson(error);
+            sendMessage(json, session);
+            return;
+        }
+        if (gameData == null) {
+            System.out.println("Game not found.");
+            ErrorMessage error = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "game not found");
+            String json = new Gson().toJson(error);
+            sendMessage(json, session);
+            return;
+        }
+
+        CONNECTIONS.computeIfAbsent(gameID, k -> new ArrayList<>()).add(session);
+
+        String color = "observer";
+        if (Objects.equals(gameData.whiteUsername(), username)) {
+            color = "white";
+        }
+        else if (Objects.equals(gameData.blackUsername(), username)) {
+            color = "black";
+        }
+
+        NotificationMessage notif = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                username + " has joined the game as " + color);
+        String json = new Gson().toJson(notif);
+        broadcastMessageExclude(json, gameID, session);
+
+        LoadGameMessage gameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData.game());
+        String jsonGame = new Gson().toJson(gameMessage);
+        sendMessage(jsonGame, session);
+    }
+
+    private void handleMakeMove(Session session, MakeMoveCommand command)
+            throws DataAccessException {
+        Integer gameID = command.getGameID();
+        String authToken = command.getAuthToken();
+        GameData gameData = gameDAO.getGameByID(gameID);
+        ChessMove move = command.getMove();
+
+        if (Objects.equals(authToken, null)) {
+            ErrorMessage error = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "invalid authToken");
+            String json = new Gson().toJson(error);
+            sendMessage(json, session);
+            return;
+        }
+        if (!(authDAO.getAuthData(authToken).username().equals(gameData.blackUsername()) && gameData.game().getTeamTurn() == ChessGame.TeamColor.BLACK)
+                && !(authDAO.getAuthData(authToken).username().equals(gameData.whiteUsername()) && gameData.game().getTeamTurn() == ChessGame.TeamColor.WHITE)) {
+            ErrorMessage error = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "wrong turn");
+            String json = new Gson().toJson(error);
+            sendMessage(json, session);
+            return;
+        }
+        if (gameData.gameName() == null) {
+            ErrorMessage error = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "game not found");
+            String json = new Gson().toJson(error);
+            sendMessage(json, session);
+            return;
+        }
+        if (gameData.game().getGameOver()) {
+            ErrorMessage error = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "game is over");
+            String json = new Gson().toJson(error);
+            sendMessage(json, session);
+            return;
+        }
         try {
-            AuthData auth = server.Server.userService.getAuthData(command.getAuthToken());
-            GameData game = server.Server.gameService.getGameByID(command.getGameID());
-            ChessGame.TeamColor userColor = getTeamColor(auth.username(), game);
-            if (userColor == null) {
-                handleError(session, new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: You are observing this game"));
-                return;
-            }
 
-            if (game.game().getGameOver()) {
-                handleError(session, new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: Game is over"));
-                return;
-            }
-
-            if (game.game().getTeamTurn().equals(userColor)) {
-                game.game().makeMove(command.getMove());
-
-                NotificationMessage notif;
-                ChessGame.TeamColor opponentColor = userColor == ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
-
-                if (game.game().isInCheckmate(opponentColor)) {
-                    notif = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "Checkmate! " + auth.username() + " wins!");
-                    game.game().setGameOver(true);
-                }
-                else if (game.game().isInStalemate(opponentColor)) {
-                    notif = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "Stalemate caused by " + auth.username() + "'s move! It's a tie!");
-                    game.game().setGameOver(true);
-                }
-                else if (game.game().isInCheck(opponentColor)) {
-                    notif = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "A move has been made by " + auth.username() + ", " + opponentColor.toString() + "is now in check!");
-                }
-                else {
-                    notif = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "A move has been made by " + auth.username());
-                }
-                broadcastMessage(session, notif);
-            }
-        } catch (DataAccessException | InvalidMoveException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    private void handleLeave(Session session, LeaveGameCommand command) throws IOException {
-        try {
-            AuthData auth = Server.userService.getAuthData(command.getAuthToken());
+    private void handleLeave(Session session, UserGameCommand command) throws IOException {
 
-            NotificationMessage notif = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, auth.username() + " left the game");
-            broadcastMessage(session, notif);
-
-            session.close();
-        } catch (DataAccessException e) {
-            handleError(session, new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "Error: Not authorized"));
-        }
     }
 
-    public void broadcastMessage(Session currSession, ServerMessage message) throws IOException {
-        broadcastMessage(currSession, message, false);
+    @OnWebSocketError
+    public void onError(Session session, Throwable throwable) {
+        System.out.println("Error: " + throwable.getMessage());
     }
 
-    public void broadcastMessage(Session currSession, ServerMessage message, boolean toSelf) throws IOException {
-        System.out.printf("Broadcasting (toSelf: %s): %s%n", toSelf, new Gson().toJson(message));
-//        for (Session session : gameSessions.keySet()) {
-//            boolean inAGame = gameSessions.get(session) != 0;
-//            boolean sameGame = gameSessions.get(session).equals(gameSessions.get(currSession));
-//            boolean isSelf = session == currSession;
-//            if ((toSelf || !isSelf) && inAGame && sameGame) {
-//                sendMessage(session, message);
-//            }
-//        }
+    @OnWebSocketClose
+    public void onClose(int statusCode, String reason) {
+        System.out.println("WebSocket closed: " + statusCode + " " + reason);
     }
 
-    public void sendMessage(Session session, ServerMessage message) throws IOException {
-        session.getRemote().sendString(new Gson().toJson(message));
+    private void broadcastMessage(String message, Integer gameID) {
+        ConcurrentHashMap<String, Connection> sessions = CONNECTIONS.
     }
 
-    private void handleError(Session session, ErrorMessage error) throws IOException {
-        System.out.printf("Error: %s%n", new Gson().toJson(error));
-        session.getRemote().sendString(new Gson().toJson(error));
-    }
 
     private ChessGame.TeamColor getTeamColor(String username, GameData game) {
         if (username.equals(game.whiteUsername())) {

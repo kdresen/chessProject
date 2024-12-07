@@ -22,15 +22,9 @@ public class UserService {
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
 
-    public UserService(boolean isSQL) {
-        if (isSQL) {
-            this.userDAO = new MySQLUserDAO();
-            this.authDAO = new MySQLAuthDAO();
-        } else {
-            this.userDAO = MemoryUserDAO.getInstance();
-            this.authDAO = MemoryAuthDAO.getInstance();
-        }
-
+    public UserService(UserDAO userDAO, AuthDAO authDAO) {
+        this.userDAO = userDAO;
+        this.authDAO = authDAO;
     }
 
     public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException {

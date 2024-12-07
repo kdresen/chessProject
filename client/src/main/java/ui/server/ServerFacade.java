@@ -81,8 +81,8 @@ public class ServerFacade {
         ws.sendMessage(message);
     }
 
-    public void joinPlayer(int gameID, ChessGame.TeamColor playerColor, String authToken) throws ResponseException {
-        sendCommand(new JoinPlayer(UserGameCommand.CommandType.CONNECT, authToken, gameID, playerColor));
+    public void joinPlayer(int gameID, String authToken) throws ResponseException {
+        sendCommand(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID));
     }
 
     public void joinObserver(int gameID) {
@@ -94,7 +94,7 @@ public class ServerFacade {
     }
 
     public void leave(int gameID) {
-        sendCommand(new LeaveGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID));
+        sendCommand(new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID));
     }
 
     public void resign(int gameID) {
