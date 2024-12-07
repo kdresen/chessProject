@@ -1,95 +1,97 @@
 package ui.websocket;
 
 import javax.websocket.*;
-import java.io.IOException;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-
-import exception.ResponseException;
-import ui.DrawChessBoard;
-import ui.Client;
-import websocket.commands.JoinPlayer;
+import ui.GameClient;
+import websocket.commands.*;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
-import static ui.EscapeSequences.*;
-
-public class WebsocketCommunicator extends Endpoint {
+@ClientEndpoint
+public class WebsocketCommunicator {
 
     Session session;
-    ServerMessageHandler serverMessageHandler;
+    private final Gson gson = new Gson();
+    private ChessGame game;
+    public ChessGame.TeamColor teamColor = ChessGame.TeamColor.WHITE;
+    private final GameClient gameClient;
 
-    public WebsocketCommunicator(String url, ServerMessageHandler serverMessageHandler) throws Exception {
+    public WebsocketCommunicator(String url, GameClient gameClient) throws Exception {
+        this.gameClient = gameClient;
+        connect(url);
+    }
+
+    private void connect(String url) throws Exception {
         try {
-            url = url.replace("http", "ws");
-            URI socketURI = new URI(url + "/ws");
-            this.serverMessageHandler = serverMessageHandler;
-
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-            this.session = container.connectToServer(this, socketURI);
-
-            // set message handler
-            this.session.addMessageHandler(new MessageHandler.Whole<String>() {
-
-                @Override
-                public void onMessage(String message) {
-                    NotificationMessage notif = new Gson().fromJson(message, NotificationMessage.class);
-                    ServerMessageHandler.notify(notif);
-                    //handleMessage(message);
-                }
-            });
-        } catch (URISyntaxException | DeploymentException | IOException e) {
-            throw new ResponseException(500, e.getMessage());
+            container.connectToServer(this, new URI(url));
+            System.out.println("Connected to websocket server at: " + url);
+        } catch (Exception e) {
+            System.err.println("Failed to connect to server: " + e.getMessage());
         }
     }
 
-    @Override
+    @OnOpen
     public void onOpen(Session session, EndpointConfig endpointConfig) {
         this.session = session;
-        System.out.println("opened websocket connection");
     }
 
-
-//    public void handleConnect(String playerName) throws ResponseException {
-//        try {
-//            JoinPlayer = new JoinPlayer(session, playerName);
-//        }
-//    }
-
-    private void handleMessage(String message) {
-        if (message.contains("\"serverMessageType\":\"NOTIFICATION\"")) {
+    @OnMessage
+    public void onMessage(String message) {
+        if (message.contains("NOTIFICATION")) {
             NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
-            printNotification(notificationMessage.getMessage());
+            handleNotification(notificationMessage.getMessage());
         }
-        else if (message.contains("\"serverMessageType\":\"ERROR\"")) {
+        else if (message.contains("ERROR")) {
             ErrorMessage error = new Gson().fromJson(message, ErrorMessage.class);
-            printNotification(error.getErrorMessage());
+            handleError(error.getErrorMessage());
         }
-        else if (message.contains("\"serverMessageType\":\"LOAD_GAME\"")) {
+        else if (message.contains("LOAD_GAME")) {
             LoadGameMessage loadGame = new Gson().fromJson(message, LoadGameMessage.class);
-            // TODO print out the game
-
+            handleLoadGame(loadGame.getGame());
+        }
+        else {
+            System.err.println("Unrecognized message type: " + message);
+        }
+    }
+    public void sendMessage(UserGameCommand command) {
+        try {
+            if (session != null && session.isOpen()) {
+                String json = gson.toJson(command);
+                session.getBasicRemote().sendText(json);
+            } else {
+                System.err.println("Websocket connection is closed, cannot send message");
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to send message: " + e.getMessage());
         }
     }
 
-    private void printNotification(String message) {
-        System.out.print(ERASE_LINE + '\r');
-        System.out.printf("\n%s\n[IN-GAME] >>> ", message);
+    public void close() {
+        try {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to close websocket session: " + e.getMessage());
+        }
     }
 
-    private void printLoadedGame(ChessGame game, ChessGame.TeamColor teamColor) {
-        System.out.print(ERASE_LINE + "\r\n");
-        DrawChessBoard.createChessBoard(game, teamColor);
-        System.out.print("[IN-GAME] >>> ");
+    private void handleLoadGame(ChessGame game) {
+        gameClient.loadGame(game);
     }
 
-    public void sendMessage(String message) {
-        this.session.getAsyncRemote().sendText(message);
+    private void handleNotification(String message) {
+        System.out.println("\rNotification: " + message);
+    }
+
+    private void handleError(String errorMessage) {
+        System.out.println("Error from server: " + errorMessage);
     }
 
 

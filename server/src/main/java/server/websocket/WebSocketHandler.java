@@ -12,26 +12,19 @@ import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
 
-import server.Server;
 import websocket.commands.*;
 import websocket.messages.*;
 
-import javax.management.NotificationFilter;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
-//import static server.Server.gameSessions;
 
 @WebSocket
 public class WebSocketHandler {
-    private UserDAO userDAO;
     private GameDAO gameDAO;
     private AuthDAO authDAO;
     private static final Map<Integer, List<Session>> CONNECTIONS = new HashMap<>();
 
-    public WebSocketHandler(AuthDAO authDAO, UserDAO userDAO, GameDAO gameDAO) {
-        this.userDAO = userDAO;
+    public WebSocketHandler(AuthDAO authDAO, GameDAO gameDAO) {
         this.gameDAO = gameDAO;
         this.authDAO = authDAO;
     }

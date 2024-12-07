@@ -121,8 +121,9 @@ public class MySQLGameDAO implements GameDAO {
         }
     }
 
-    public void updateChessGame(ChessGame game, Integer gameID) throws DataAccessException {
-        String sql = "UPDATE games SET gameName = ? WHERE gameID = ?";
+    @Override
+    public void updateGame(ChessGame game, Integer gameID) throws DataAccessException {
+        String sql = "UPDATE games SET game = ? WHERE gameID = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             String gameJson = new Gson().toJson(game);

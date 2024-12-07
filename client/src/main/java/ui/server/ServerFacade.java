@@ -1,7 +1,6 @@
 package ui.server;
 
 import chess.ChessGame;
-import chess.ChessMove;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.UserData;
@@ -10,12 +9,8 @@ import request.JoinGameRequest;
 import request.LoginRequest;
 import request.RegisterRequest;
 import result.*;
-import ui.websocket.ServerMessageHandler;
+import ui.GameClient;
 import ui.websocket.WebsocketCommunicator;
-import websocket.commands.JoinPlayer;
-import websocket.commands.LeaveGameCommand;
-import websocket.commands.MakeMoveCommand;
-import websocket.commands.UserGameCommand;
 
 import java.io.*;
 import java.net.*;
@@ -26,7 +21,6 @@ import java.net.*;
 public class ServerFacade {
     private final String serverUrl;
     WebsocketCommunicator ws;
-    String authToken;
 
 
 
@@ -34,12 +28,10 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    private String getAuthToken() {
-        return authToken;
-    }
-
-    private void setAuthToken(String authToken) {
-        this.authToken = authToken;
+    public WebsocketCommunicator createWebSocketClient(GameClient gameClient) throws Exception {
+        String uri = serverUrl + "/ws";
+        uri = uri.replaceFirst("http", "ws");
+        return new WebsocketCommunicator(uri, gameClient);
     }
 
     // http.setRequestProperty for setting authorization
@@ -71,37 +63,11 @@ public class ServerFacade {
 
     }
 
-    public void joinGame(int gameID, ChessGame.TeamColor playerColor, String authToken) throws ResponseException {
+    public String joinGame(int gameID, ChessGame.TeamColor playerColor, String authToken) throws ResponseException {
         var path = "/game";
-        this.makeRequest("PUT", path, new JoinGameRequest(playerColor, gameID), null, authToken);
+
+        return this.makeRequest("PUT", path, new JoinGameRequest(playerColor, gameID), null, authToken);
     }
-
-    public void sendCommand(UserGameCommand command) {
-        String message = new Gson().toJson(command);
-        ws.sendMessage(message);
-    }
-
-    public void joinPlayer(int gameID, String authToken) throws ResponseException {
-        sendCommand(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID));
-    }
-
-    public void joinObserver(int gameID) {
-        sendCommand(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID));
-    }
-
-    public void makeMove(int gameID, ChessMove move) {
-        sendCommand(new MakeMoveCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID, move));
-    }
-
-    public void leave(int gameID) {
-        sendCommand(new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID));
-    }
-
-    public void resign(int gameID) {
-        sendCommand(new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID));
-    }
-
-
 
     public void clearDatabases() {
         try {

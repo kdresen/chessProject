@@ -34,10 +34,6 @@ public class Server {
 
     public static ConcurrentHashMap<Session, Integer> gameSessions = new ConcurrentHashMap<>();
 
-    static {
-
-    }
-
     public Server() {}
 
 
@@ -58,7 +54,7 @@ public class Server {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
-        Spark.webSocket("/ws", new WebSocketHandler(authDAO, userDAO, gameDAO));
+        Spark.webSocket("/ws", new WebSocketHandler(authDAO, gameDAO));
 
         Spark.notFound("<html><body>My custom 404 page</body></html>");
 

@@ -1,213 +1,109 @@
 package ui;
 
-import chess.ChessGame;
-import chess.ChessPiece;
+import chess.*;
+
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 
 import static ui.EscapeSequences.*;
 
 public class DrawChessBoard {
 
-    private static final int BOARD_SIZE_IN_SQUARES = 8;
-    private static final int SQUARE_SIZE_IN_PADDED_CHARS = 1;
-    public static final String WHITE_KING = " K ";
-    public static final String WHITE_QUEEN = " Q ";
-    public static final String WHITE_BISHOP = " B ";
-    public static final String WHITE_KNIGHT = " K ";
-    public static final String WHITE_ROOK = " R ";
-    public static final String WHITE_PAWN = " P ";
-    public static final String BLACK_KING = " K ";
-    public static final String BLACK_QUEEN = " Q ";
-    public static final String BLACK_BISHOP = " B ";
-    public static final String BLACK_KNIGHT = " K ";
-    public static final String BLACK_ROOK = " R ";
-    public static final String BLACK_PAWN = " P ";
-    public static final String EMPTY = "   ";
-
-
-    private static ChessGame.TeamColor playerColor = null;
-    private static ChessGame currentGame = null;
-
-    ///  createChessBoard ChessGame game, ChessGame.TeamColor color
-
-    public static void createChessBoard(ChessGame game, ChessGame.TeamColor color) {
-        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        playerColor = color;
-        currentGame = game;
-
-        out.print(ERASE_SCREEN);
-
-        drawHeaders(out);
-        drawChessBoard(out);
-        drawHeaders(out);
-
-        out.print(RESET_BG_COLOR);
-        out.print(RESET_TEXT_COLOR);
+    private DrawChessBoard() {
     }
 
-    private static void drawHeaders(PrintStream out) {
-        setGray(out);
-        out.print("   "); // padding for row numbers.
-        if (playerColor == ChessGame.TeamColor.BLACK) {
-            for (char file = 'h'; file >= 'a'; file--) {
-                out.print(" ");
-                out.print(file);
-                out.print(" ");
+    public static void drawBoard(ChessBoard board, ChessGame.TeamColor playerColor,
+                                 Collection<ChessPosition> moves) {
+        boolean whitePlayer = (playerColor == ChessGame.TeamColor.WHITE);
+        String[] colLabels = {"\u2003A ", "\u2002B ", "\u2003C ", "\u2003D ", "\u2003E ",
+                "\u2003F ", "\u2003G ", "\u2003H "};
+        System.out.print("Drawing chess board");
+
+        System.out.println(ERASE_SCREEN);
+
+        int startRow = whitePlayer ? 7 : 0;
+        int endRow = whitePlayer ? 0 : 7;
+        int rowStep = whitePlayer ? -1 : 1;
+        int startCol = whitePlayer ? 0 : 7;
+        int endCol = whitePlayer ? 7 : 0;
+        int colStep = whitePlayer ? 1 : -1;
+
+
+        System.out.print(SET_BG_COLOR_DARK_GREY + EMPTY);
+        for (int i = startCol; i - colStep != endCol; i += colStep) {
+            System.out.print(colLabels[i]);
+        }
+        System.out.println(EMPTY + RESET_BG_COLOR);
+        for (int i = startRow; i - rowStep != endRow; i += rowStep) {
+            System.out.print(SET_BG_COLOR_DARK_GREY + "\u2003" + (i + 1) + " ");
+            if (i % 2 == 0) {
+                for (int j = startCol; j - colStep != endCol; j += colStep) {
+                    String backgroundColor = (j % 2 == 0) ? SET_BG_COLOR_BLACK : SET_BG_COLOR_WHITE;
+                    if (moves != null && moves.contains(new ChessPosition(i + 1, j + 1))) {
+                        backgroundColor = (j % 2 == 0) ? SET_BG_COLOR_DARK_GREEN : SET_BG_COLOR_GREEN;
+                    }
+                    System.out.print(backgroundColor + getPieceString(board.getPiece(new ChessPosition(i + 1, j + 1))));
+                }
+            } else {
+                for (int j = startCol; j - colStep != endCol; j += colStep) {
+                    String backgroundColor = (j % 2 != 0) ? SET_BG_COLOR_BLACK : SET_BG_COLOR_WHITE;
+                    if (moves != null && moves.contains(new ChessPosition(i + 1, j + 1))) {
+                        backgroundColor = (j % 2 != 0) ? SET_BG_COLOR_DARK_GREEN : SET_BG_COLOR_GREEN;
+                    }
+                    System.out.print(backgroundColor + getPieceString(board.getPiece(new ChessPosition(i + 1, j + 1))));
+                }
             }
+            System.out.println(SET_BG_COLOR_DARK_GREY + " " + (i + 1) + "\u2003" + RESET_BG_COLOR);
+        }
+        System.out.print(SET_BG_COLOR_DARK_GREY + EMPTY);
+        for (int i = startCol; i - colStep != endCol; i += colStep) {
+            System.out.print(colLabels[i]);
+        }
+        System.out.println(EMPTY + RESET_BG_COLOR);
+
+    }
+
+    public static void printHightlights(ChessBoard board, ChessGame.TeamColor playerColor, Collection<ChessMove> moves) {
+        if (moves != null) {
+            Collection<ChessPosition> positions = new ArrayList<>();
+            for (ChessMove move : moves) {
+                positions.add(move.getStartPosition());
+                positions.add(move.getEndPosition());
+            }
+
+            drawBoard(board, playerColor, positions);
         } else {
-            for (char file = 'a'; file <= 'h'; file++) {
-
-                out.print(" ");
-                out.print(file);
-                out.print(" ");
-            }
-        }
-        out.print("   ");
-        out.print(RESET_BG_COLOR);
-        out.println();
-    }
-
-    private static void drawChessBoard(PrintStream out) {
-        for (int row = 0; row < BOARD_SIZE_IN_SQUARES; row++) {
-            drawRow(out, row);
+            System.out.println("no moves available");
         }
     }
 
-    private static void drawRow(PrintStream out, int boardRow) {
-        // white perspective
-        for (int squareRow = 0; squareRow < SQUARE_SIZE_IN_PADDED_CHARS; squareRow++) {
-            setGray(out);
-            var rowNum =  playerColor == ChessGame.TeamColor.WHITE ? (8 - boardRow) : (1 + boardRow);
-            out.print(" " + rowNum + " ");
-
-
-            for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; boardCol++) {
-                if ((boardRow + boardCol) % 2 == 0) {
-                    setWhite(out);
-                } else {
-                    setBlack(out);
-                }
-
-                String piece = getChessPiece(boardRow, boardCol, out);
-                if (piece.equals(" ")) {
-                    out.print(EMPTY);
-                } else {
-                    out.print(piece);
-                }
-
-
-            }
-            setGray(out);
-            rowNum = playerColor == ChessGame.TeamColor.WHITE ? (8 - boardRow) : (1 + boardRow);
-            out.print(" " + rowNum + " ");
-
-            out.print(RESET_BG_COLOR);
-            out.println();
-            setBlack(out);
-        }
-    }
-
-    private static String getChessPiece(int row, int col, PrintStream out) {
-        // I need to get the chess piece at the specific row and col,
-        // but have it reversed if the playerColor
-        // is black
-
-        int adjustedRow = getAdjustedRow(row);
-        int adjustedCol = getAdjustedCol(col);
-
-        ChessPiece currentPiece = currentGame.getBoard().getPiece(adjustedRow + 1, adjustedCol + 1);
-        if (currentPiece == null) {
+    private static String getPieceString(ChessPiece piece) {
+        if (piece == null) {
             return EMPTY;
         }
-        switch (currentPiece.getPieceType()) {
-            case KING -> {
-                if (currentPiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    setRed(out);
-                    return WHITE_KING;
-                }
-                setBlue(out);
-                return BLACK_KING;
-            }
-            case QUEEN -> {
-                if (currentPiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    setRed(out);
-                    return WHITE_QUEEN;
-                }
-                setBlue(out);
-                return BLACK_QUEEN;
-            }
-            case BISHOP -> {
-                if (currentPiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    setRed(out);
-                    return WHITE_BISHOP;
-                }
-                setBlue(out);
-                return BLACK_BISHOP;
-            }
-            case KNIGHT -> {
-                if (currentPiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    setRed(out);
-                    return WHITE_KNIGHT;
-                }
-                setBlue(out);
-                return BLACK_KNIGHT;
-            }
-            case ROOK -> {
-                if (currentPiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    setRed(out);
-                    return WHITE_ROOK;
-                }
-                setBlue(out);
-                return BLACK_ROOK;
-            }
-            default -> {
-                if (currentPiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    setRed(out);
-                    return WHITE_PAWN;
-                }
-                setBlue(out);
-                return BLACK_PAWN;
-            }
+        if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+            return switch (piece.getPieceType()) {
+                case KING -> BLACK_KING;
+                case QUEEN -> BLACK_QUEEN;
+                case KNIGHT -> BLACK_KNIGHT;
+                case BISHOP -> BLACK_BISHOP;
+                case ROOK -> BLACK_ROOK;
+                case PAWN -> BLACK_PAWN;
+            };
+        } else {
+            return switch (piece.getPieceType()) {
+                case KING -> WHITE_KING;
+                case QUEEN -> WHITE_QUEEN;
+                case KNIGHT -> WHITE_KNIGHT;
+                case BISHOP -> WHITE_BISHOP;
+                case ROOK -> WHITE_ROOK;
+                case PAWN -> WHITE_PAWN;
+            };
         }
-    }
-
-    private static int getAdjustedRow(int row) {
-        if (playerColor == ChessGame.TeamColor.WHITE) {
-            return BOARD_SIZE_IN_SQUARES - 1 - row;
-        }
-        return row;
-    }
-
-    private static int getAdjustedCol(int col) {
-        if (playerColor == ChessGame.TeamColor.BLACK) {
-            return BOARD_SIZE_IN_SQUARES - 1 - col;
-        }
-        return col;
-    }
-
-
-    // for next phase, some functions to highlight valid moves and such
-
-
-    private static void setGray(PrintStream out) {
-        out.print(SET_BG_COLOR_LIGHT_GREY);
-        out.print(SET_TEXT_COLOR_BLACK);
-    }
-
-    private static void setBlack(PrintStream out) {
-        out.print(SET_BG_COLOR_BLACK);
-    }
-
-    private static void setBlue(PrintStream out) {
-        out.print(SET_TEXT_COLOR_BLUE);
-    }
-
-    private static void setRed(PrintStream out) {
-        out.print(SET_TEXT_COLOR_RED);
-    }
-
-    private static void setWhite(PrintStream out) {
-        out.print(SET_BG_COLOR_WHITE);
     }
 }
+
+

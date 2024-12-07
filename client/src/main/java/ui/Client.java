@@ -1,7 +1,6 @@
 package ui;
 
 import chess.ChessGame;
-import chess.ChessPosition;
 import exception.ResponseException;
 import model.GameData;
 import model.UserData;
@@ -12,9 +11,6 @@ import ui.websocket.WebsocketCommunicator;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-
-
-import static ui.DrawChessBoard.createChessBoard;
 
 public class Client {
 
@@ -28,23 +24,21 @@ public class Client {
     private List<GameData> fullGameList;
     private List<String> mostRecentGamesList;
     ChessGame currentGame;
-    private ChessGame.TeamColor clientColor;
-    public static DrawChessBoard drawChessBoard;
-    private final String serverUrl;
 
     private WebsocketCommunicator ws;
-    private final ServerMessageHandler serverMessageHandler;
 
 
     public Client(String serverUrl, ServerMessageHandler serverMessageHandler) {
         this.server = new ServerFacade(serverUrl);
-        this.serverUrl = serverUrl;
+
         this.authToken = null;
         this.mostRecentGamesList = null;
         this.fullGameList = null;
         this.currentGame = null;
-        this.clientColor = null;
-        this.serverMessageHandler = serverMessageHandler;
+    }
+
+    public ServerFacade getServer() {
+        return server;
     }
 
     public State getState() {
@@ -74,18 +68,8 @@ public class Client {
                     case "quit" -> "quit";
                     default -> help();
                 };
-            } else if (state == State.INGAME){
-                return switch(cmd) {
-                    case "redraw" -> redraw();
-                    case "show" -> show(params);
-                    case "move" -> makeMove(params);
-                    case "leave" -> leaveGame();
-                    case "resign" -> resignGame();
-                    case "quit" -> "quit";
-                    default -> help();
-                };
             } else {
-                return leaveObserver();
+                return " fix this";
             }
         } catch (ResponseException ex) {
             return ex.getMessage();
@@ -239,6 +223,11 @@ public class Client {
             // add the player to the game
             try {
                 server.joinGame(gameID, color, authToken);
+
+                System.out.println("Joined game successfully.");
+                new GameClient(this, gameID, color, authToken).start();
+                return "Exited game";
+
             } catch (ResponseException ex) {
                 if (ex.getStatusCode() == 403) {
                     return "This color is already taken, please choose another, or create a new game.";
@@ -249,21 +238,9 @@ public class Client {
                 if (ex.getStatusCode() == 500) {
                     return "Unable to contact server, please try again later.";
                 }
-            }
-
-            try {
-                ws = new WebsocketCommunicator(serverUrl, serverMessageHandler);
             } catch (Exception e) {
-                return "Error: " + e.getMessage();
+                throw new RuntimeException(e);
             }
-
-
-            clientColor = color;
-            currentGame = game.game();
-            createChessBoard(game.game(), color);
-            state = State.INGAME;
-            return "Successfully joined " + gameName;
-
         }
 
         return "Please enter the game number and team color (example: join 1 w) \n To view the list of games, enter \"list\"";
@@ -282,89 +259,17 @@ public class Client {
         }
         GameData game = getGameFromNumber(Integer.parseInt(params[0]));
 
-        // draw the game
-        assert game != null;
-        clientColor = ChessGame.TeamColor.WHITE;
-        currentGame = game.game();
-        createChessBoard(game.game(), ChessGame.TeamColor.WHITE);
-
-        return "Observing " + game.gameName();
-    }
-
-
-
-    // In Game Commands
-
-    public String redraw() throws ResponseException {
         try {
-            assertInGame();
-        } catch (ResponseException ex) {
-            int statusCode = ex.getStatusCode();
-            if (statusCode == 401) {
-                return "Unauthorized";
-            }
+            assert game != null;
+            new GameClient(this, game.gameID(), null, authToken).start();
+            return "Exited game";
+        } catch (Exception e) {
+            return "Failed to observe game: " + e.getMessage();
         }
-        // draw the game board from the client's saved color
-        createChessBoard(currentGame, clientColor);
-
-        return "Board updated";
     }
-
-    public String show(String... params) throws ResponseException {
-        // prints out the board but with highlighted spaces for legal moves
-        assertInGame();
-
-        if (params.length == 1 && params[0].matches("[a-h][1-8]")) {
-            ChessPosition position = new ChessPosition(params[0].charAt(0) - '0', params[0].charAt(0) - ('a'-1));
-        }
-
-        return null;
-    }
-
-    public String makeMove(String... params) throws ResponseException {
-        // updates ChessGame in the database with the new position of the piece
-        assertInGame();
-
-        return null;
-    }
-
-    public String leaveGame(String... params) throws ResponseException {
-        assertInGame();
-
-        // leave the game
-
-        return null;
-    }
-
-    public String leaveObserver(String... params) throws ResponseException {
-        // leave the game as observer
-
-        state = State.SIGNEDIN;
-
-        return "Left Game";
-    }
-
-    public String resignGame(String... params) throws ResponseException {
-        assertInGame();
-        // get confirmation
-
-        // resign the game
-
-        // game is over, but doesn't force user to leave game
-
-        return null;
-    }
-
-
-
-
 
     private String getGameNameFromIndex(int index) {
         return mostRecentGamesList.get(index);
-    }
-
-    public void updateCurrentGame(GameData game) {
-        currentGame = game.game();
     }
 
     private GameData getGameFromNumber(int gameNumber) {

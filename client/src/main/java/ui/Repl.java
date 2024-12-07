@@ -34,7 +34,7 @@ public class Repl implements ServerMessageHandler {
         var result = "";
         while (!result.equals("quit")) {
             printPrompt();
-            String line = scanner.nextLine();
+            String line = scanner.nextLine().trim().toLowerCase();
 
             try {
                 result = client.eval(line);
