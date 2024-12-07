@@ -10,6 +10,7 @@ import request.JoinGameRequest;
 import request.LoginRequest;
 import request.RegisterRequest;
 import result.*;
+import ui.websocket.ServerMessageHandler;
 import ui.websocket.WebsocketCommunicator;
 import websocket.commands.JoinPlayer;
 import websocket.commands.LeaveGameCommand;
@@ -73,14 +74,6 @@ public class ServerFacade {
     public void joinGame(int gameID, ChessGame.TeamColor playerColor, String authToken) throws ResponseException {
         var path = "/game";
         this.makeRequest("PUT", path, new JoinGameRequest(playerColor, gameID), null, authToken);
-    }
-
-    public void connectWS() {
-        try {
-            ws = new WebsocketCommunicator(serverUrl);
-        } catch (Exception e) {
-            System.out.println("Failed to make connection with server");
-        }
     }
 
     public void sendCommand(UserGameCommand command) {

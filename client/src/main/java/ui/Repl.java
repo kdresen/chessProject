@@ -1,10 +1,14 @@
 package ui;
 
+import ui.websocket.ServerMessageHandler;
+import websocket.messages.NotificationMessage;
+import ui.EscapeSequences.*;
+
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
-public class Repl {
+public class Repl implements ServerMessageHandler {
     // just logic of spits out prompt and takes in input and tells client to
     // evaluate the stuff, client does stuff and returns result
     // all logic handled in the client
@@ -18,8 +22,8 @@ public class Repl {
     private final Client client;
 
 
-    public Repl(String serverUrl) {
-        client = new Client(serverUrl);
+    public Repl (String serverUrl) {
+        client = new Client(serverUrl, this);
     }
 
     public void run() {
@@ -41,6 +45,11 @@ public class Repl {
             }
         }
         System.out.println();
+    }
+
+    public void notify(NotificationMessage msg) {
+        System.out.println(SET_TEXT_COLOR_RED + msg.getMessage());
+        printPrompt();
     }
 
     private void printPrompt() {

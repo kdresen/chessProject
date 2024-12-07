@@ -12,7 +12,6 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import org.eclipse.jetty.websocket.client.io.ConnectionManager;
 import server.Server;
 import websocket.commands.*;
 import websocket.messages.*;
@@ -21,20 +20,22 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.Timer;
 
-import static server.Server.gameSessions;
+//import static server.Server.gameSessions;
 
 @WebSocket
 public class WebSocketHandler {
-//    private final ConnectionManager connections = new ConnectionManager();
+    private final ConnectionManager myConnections = new ConnectionManager();
 
     @OnWebSocketConnect
     public void onConnect(Session session) throws Exception {
-        gameSessions.put(session, 0);
+//        gameSessions.put(session, 0);
+        System.out.println("WebSocket connected: " + session);
+        myConnections.addSession("test", session);
     }
 
     @OnWebSocketClose
     public void onClose(Session session, int statusCode, String reason) {
-        gameSessions.remove(session);
+
     }
 
     @OnWebSocketMessage
@@ -44,7 +45,7 @@ public class WebSocketHandler {
         // connect to game with connect command
         if (message.contains("\"commandType\":\"CONNECT\"")) {
             JoinPlayer command = new Gson().fromJson(message, JoinPlayer.class);
-            gameSessions.replace(session, command.getGameID());
+//            gameSessions.replace(session, command.getGameID());
             handleJoinPlayer(session, new JoinPlayer(command.getCommandType(), command.getAuthToken(), command.getGameID(), command.getTeamColor()));
         }
         else if (message.contains("\"commmandType\":\"MAKE_MOVE")) {
@@ -146,14 +147,14 @@ public class WebSocketHandler {
 
     public void broadcastMessage(Session currSession, ServerMessage message, boolean toSelf) throws IOException {
         System.out.printf("Broadcasting (toSelf: %s): %s%n", toSelf, new Gson().toJson(message));
-        for (Session session : gameSessions.keySet()) {
-            boolean inAGame = gameSessions.get(session) != 0;
-            boolean sameGame = gameSessions.get(session).equals(gameSessions.get(currSession));
-            boolean isSelf = session == currSession;
-            if ((toSelf || !isSelf) && inAGame && sameGame) {
-                sendMessage(session, message);
-            }
-        }
+//        for (Session session : gameSessions.keySet()) {
+//            boolean inAGame = gameSessions.get(session) != 0;
+//            boolean sameGame = gameSessions.get(session).equals(gameSessions.get(currSession));
+//            boolean isSelf = session == currSession;
+//            if ((toSelf || !isSelf) && inAGame && sameGame) {
+//                sendMessage(session, message);
+//            }
+//        }
     }
 
     public void sendMessage(Session session, ServerMessage message) throws IOException {

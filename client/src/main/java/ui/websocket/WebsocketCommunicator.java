@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import exception.ResponseException;
 import ui.DrawChessBoard;
 import ui.Client;
+import websocket.commands.JoinPlayer;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
@@ -23,10 +24,11 @@ public class WebsocketCommunicator extends Endpoint {
     Session session;
     ServerMessageHandler serverMessageHandler;
 
-    public WebsocketCommunicator(String url) throws Exception {
+    public WebsocketCommunicator(String url, ServerMessageHandler serverMessageHandler) throws Exception {
         try {
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/ws");
+            this.serverMessageHandler = serverMessageHandler;
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
@@ -36,7 +38,9 @@ public class WebsocketCommunicator extends Endpoint {
 
                 @Override
                 public void onMessage(String message) {
-                    handleMessage(message);
+                    NotificationMessage notif = new Gson().fromJson(message, NotificationMessage.class);
+                    ServerMessageHandler.notify(notif);
+                    //handleMessage(message);
                 }
             });
         } catch (URISyntaxException | DeploymentException | IOException e) {
@@ -46,8 +50,16 @@ public class WebsocketCommunicator extends Endpoint {
 
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
-
+        this.session = session;
+        System.out.println("opened websocket connection");
     }
+
+
+//    public void handleConnect(String playerName) throws ResponseException {
+//        try {
+//            JoinPlayer = new JoinPlayer(session, playerName);
+//        }
+//    }
 
     private void handleMessage(String message) {
         if (message.contains("\"serverMessageType\":\"NOTIFICATION\"")) {

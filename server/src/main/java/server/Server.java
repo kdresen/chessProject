@@ -49,7 +49,7 @@ public class Server {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
-        Spark.webSocket("/connect", WebSocketHandler.class);
+        Spark.webSocket("/ws", WebSocketHandler.class);
 
         Spark.notFound("<html><body>My custom 404 page</body></html>");
 

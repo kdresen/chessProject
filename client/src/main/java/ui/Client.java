@@ -6,6 +6,8 @@ import exception.ResponseException;
 import model.GameData;
 import model.UserData;
 import ui.server.ServerFacade;
+import ui.websocket.ServerMessageHandler;
+import ui.websocket.WebsocketCommunicator;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,15 +30,21 @@ public class Client {
     ChessGame currentGame;
     private ChessGame.TeamColor clientColor;
     public static DrawChessBoard drawChessBoard;
+    private final String serverUrl;
+
+    private WebsocketCommunicator ws;
+    private final ServerMessageHandler serverMessageHandler;
 
 
-    public Client(String serverUrl) {
+    public Client(String serverUrl, ServerMessageHandler serverMessageHandler) {
         this.server = new ServerFacade(serverUrl);
+        this.serverUrl = serverUrl;
         this.authToken = null;
         this.mostRecentGamesList = null;
         this.fullGameList = null;
         this.currentGame = null;
         this.clientColor = null;
+        this.serverMessageHandler = serverMessageHandler;
     }
 
     public State getState() {
@@ -193,8 +201,13 @@ public class Client {
         return output.toString().trim();
     }
 
-    public String joinGame(String... params) throws ResponseException {
-        assertSignedIn();
+    public String joinGame(String... params) {
+        try {
+            assertSignedIn();
+        } catch (ResponseException ex) {
+            return "Please sign in";
+        }
+
         // add check to make sure games list isn't empty
         if (params.length >= 1) {
             if (params.length == 1) {
@@ -237,6 +250,14 @@ public class Client {
                     return "Unable to contact server, please try again later.";
                 }
             }
+
+            try {
+                ws = new WebsocketCommunicator(serverUrl, serverMessageHandler);
+            } catch (Exception e) {
+                return "Error: " + e.getMessage();
+            }
+
+
             clientColor = color;
             currentGame = game.game();
             createChessBoard(game.game(), color);
