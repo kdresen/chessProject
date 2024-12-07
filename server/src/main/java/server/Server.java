@@ -8,6 +8,8 @@ import model.GameData;
 import model.UserData;
 import request.*;
 import result.*;
+import server.websocket.WebSocketHandler;
+import org.eclipse.jetty.websocket.api.Session;
 import service.AdminService;
 import service.GameService;
 import service.UserService;
@@ -15,6 +17,7 @@ import spark.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Server {
     private final UserService userService;
@@ -23,6 +26,7 @@ public class Server {
     private final Gson gson = new Gson();
     static final boolean SQL = true;
 
+    public static ConcurrentHashMap<Session, Integer> gameSessions = new ConcurrentHashMap<>();
 
     public Server() {
         if (SQL) {
@@ -44,6 +48,7 @@ public class Server {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+        Spark.webSocket("/connect", WebSocketHandler.class);
 
         Spark.notFound("<html><body>My custom 404 page</body></html>");
 

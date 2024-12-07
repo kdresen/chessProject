@@ -5,6 +5,9 @@ import exception.ResponseException;
 import model.GameData;
 import model.UserData;
 import server.ServerFacade;
+import chess.ChessMove;
+import websocket.messages.ServerMessage;
+import websocket.commands.*;
 
 import java.util.Arrays;
 import java.util.List;

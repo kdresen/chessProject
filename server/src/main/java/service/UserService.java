@@ -7,6 +7,7 @@ import dataaccess.memorydao.MemoryUserDAO;
 import dataaccess.sqldao.MySQLAuthDAO;
 import dataaccess.sqldao.MySQLUserDAO;
 import dataaccess.daointerfaces.UserDAO;
+import exception.ResponseException;
 import model.AuthData;
 import model.UserData;
 import request.LoginRequest;
