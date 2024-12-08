@@ -88,6 +88,7 @@ public class WebsocketCommunicator {
 
     private void handleNotification(String message) {
         System.out.println("\rNotification: " + message);
+        System.out.print("[IN_GAME] >>> ");
     }
 
     private void handleError(String errorMessage) {

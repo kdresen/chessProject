@@ -86,21 +86,21 @@ public class DrawChessBoard {
         }
         if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
             return switch (piece.getPieceType()) {
-                case KING -> BLACK_KING;
-                case QUEEN -> BLACK_QUEEN;
-                case KNIGHT -> BLACK_KNIGHT;
-                case BISHOP -> BLACK_BISHOP;
-                case ROOK -> BLACK_ROOK;
-                case PAWN -> BLACK_PAWN;
+                case KING -> SET_TEXT_COLOR_BLUE + BLACK_KING + RESET_TEXT_COLOR;
+                case QUEEN -> SET_TEXT_COLOR_BLUE + BLACK_QUEEN + RESET_TEXT_COLOR;
+                case KNIGHT -> SET_TEXT_COLOR_BLUE + BLACK_KNIGHT + RESET_TEXT_COLOR;
+                case BISHOP -> SET_TEXT_COLOR_BLUE + BLACK_BISHOP + RESET_TEXT_COLOR;
+                case ROOK -> SET_TEXT_COLOR_BLUE + BLACK_ROOK + RESET_TEXT_COLOR;
+                case PAWN -> SET_TEXT_COLOR_BLUE + BLACK_PAWN + RESET_TEXT_COLOR;
             };
         } else {
             return switch (piece.getPieceType()) {
-                case KING -> WHITE_KING;
-                case QUEEN -> WHITE_QUEEN;
-                case KNIGHT -> WHITE_KNIGHT;
-                case BISHOP -> WHITE_BISHOP;
-                case ROOK -> WHITE_ROOK;
-                case PAWN -> WHITE_PAWN;
+                case KING -> SET_TEXT_COLOR_RED + WHITE_KING + RESET_TEXT_COLOR;
+                case QUEEN -> SET_TEXT_COLOR_RED + WHITE_QUEEN + RESET_TEXT_COLOR;
+                case KNIGHT -> SET_TEXT_COLOR_RED + WHITE_KNIGHT + RESET_TEXT_COLOR;
+                case BISHOP -> SET_TEXT_COLOR_RED + WHITE_BISHOP + RESET_TEXT_COLOR;
+                case ROOK -> SET_TEXT_COLOR_RED + WHITE_ROOK + RESET_TEXT_COLOR;
+                case PAWN -> SET_TEXT_COLOR_RED + WHITE_PAWN + RESET_TEXT_COLOR;
             };
         }
     }

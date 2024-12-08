@@ -117,6 +117,7 @@ public class WebSocketHandler {
         LoadGameMessage gameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData.game());
         String jsonGame = new Gson().toJson(gameMessage);
         sendMessage(jsonGame, session);
+        System.out.print("[IN_GAME] >>> ");
     }
 
     private void handleMakeMove(Session session, MakeMoveCommand command)
@@ -189,6 +190,7 @@ public class WebSocketHandler {
                 broadcastMessage(json, gameID);
                 game.setGameOver(true);
             }
+            System.out.print("[IN_GAME] >>> ");
         } catch (InvalidMoveException e) {
             ErrorMessage error = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "invalid move");
             String json = new Gson().toJson(error);
@@ -242,6 +244,7 @@ public class WebSocketHandler {
             gameDAO.updateGame(gameData.game(), gameID);
         }
         CONNECTIONS.get(gameID).remove(session);
+        System.out.print("[IN_GAME] >>> ");
     }
 
     private void handleResign(Session session, UserGameCommand command) throws DataAccessException {
@@ -281,6 +284,7 @@ public class WebSocketHandler {
             game.setGameOver(true);
             gameDAO.updateGame(game, gameID);
         }
+        System.out.print("[IN_GAME] >>> ");
     }
 
     private static NotificationMessage getNotificationMessage(String username, GameData gameData) {
@@ -304,9 +308,9 @@ public class WebSocketHandler {
     private void broadcastMessage(String message, Integer gameID) {
         List<Session> gameSessions = CONNECTIONS.get(gameID);
         if (gameSessions != null) {
-            for (Session session : gameSessions) {
-                if (session.isOpen()) {
-                    sendMessage(message, session);
+            for (Session gameSession : gameSessions) {
+                if (gameSession.isOpen()) {
+                    sendMessage(message, gameSession);
                 }
             }
         }
@@ -317,7 +321,7 @@ public class WebSocketHandler {
         if (gameSessions != null) {
             for (Session gameSession : gameSessions) {
                 if (gameSession != session && gameSession.isOpen()) {
-                    sendMessage(message, session);
+                    sendMessage(message, gameSession);
                 }
             }
         }

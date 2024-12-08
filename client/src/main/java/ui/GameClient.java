@@ -175,11 +175,11 @@ public class GameClient {
             UserGameCommand command = new MakeMoveCommand(UserGameCommand.CommandType.MAKE_MOVE
                     , authToken, gameID, move);
             websocketCommunicator.sendMessage(command);
+
         } catch (IllegalArgumentException ex) {
             System.out.println("Unable to make move: " + ex.getMessage());
         }
-
-        // redraw chessboard TODO
+        System.out.print("[IN_GAME] >>> ");
     }
 
     public void resign() {
@@ -192,6 +192,7 @@ public class GameClient {
         } else {
             System.out.println("Canceled");
         }
+        System.out.print("[IN_GAME] >>> ");
     }
 
     private void showLegalMoves() {
