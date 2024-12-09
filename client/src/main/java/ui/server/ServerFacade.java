@@ -20,7 +20,6 @@ import java.net.*;
 
 public class ServerFacade {
     private final String serverUrl;
-    WebsocketCommunicator ws;
 
 
 
@@ -28,7 +27,7 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public WebsocketCommunicator createWebSocketClient(GameClient gameClient) throws Exception {
+    public WebsocketCommunicator createWebSocketClient(GameClient gameClient) {
         String uri = serverUrl + "/ws";
         uri = uri.replaceFirst("http", "ws");
         return new WebsocketCommunicator(uri, gameClient);

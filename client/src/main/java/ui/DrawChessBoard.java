@@ -2,11 +2,8 @@ package ui;
 
 import chess.*;
 
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 
 import static ui.EscapeSequences.*;
 
@@ -84,25 +81,27 @@ public class DrawChessBoard {
         if (piece == null) {
             return EMPTY;
         }
-        if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
-            return switch (piece.getPieceType()) {
-                case KING -> SET_TEXT_COLOR_BLUE + BLACK_KING + RESET_TEXT_COLOR;
-                case QUEEN -> SET_TEXT_COLOR_BLUE + BLACK_QUEEN + RESET_TEXT_COLOR;
-                case KNIGHT -> SET_TEXT_COLOR_BLUE + BLACK_KNIGHT + RESET_TEXT_COLOR;
-                case BISHOP -> SET_TEXT_COLOR_BLUE + BLACK_BISHOP + RESET_TEXT_COLOR;
-                case ROOK -> SET_TEXT_COLOR_BLUE + BLACK_ROOK + RESET_TEXT_COLOR;
-                case PAWN -> SET_TEXT_COLOR_BLUE + BLACK_PAWN + RESET_TEXT_COLOR;
-            };
-        } else {
-            return switch (piece.getPieceType()) {
-                case KING -> SET_TEXT_COLOR_RED + WHITE_KING + RESET_TEXT_COLOR;
-                case QUEEN -> SET_TEXT_COLOR_RED + WHITE_QUEEN + RESET_TEXT_COLOR;
-                case KNIGHT -> SET_TEXT_COLOR_RED + WHITE_KNIGHT + RESET_TEXT_COLOR;
-                case BISHOP -> SET_TEXT_COLOR_RED + WHITE_BISHOP + RESET_TEXT_COLOR;
-                case ROOK -> SET_TEXT_COLOR_RED + WHITE_ROOK + RESET_TEXT_COLOR;
-                case PAWN -> SET_TEXT_COLOR_RED + WHITE_PAWN + RESET_TEXT_COLOR;
-            };
+        return getFormattedPieceText(piece.getTeamColor(), piece.getPieceType());
+
+    }
+
+    private static String getFormattedPieceText(ChessGame.TeamColor teamColor, ChessPiece.PieceType pieceType) {
+        String textColor = teamColor == ChessGame.TeamColor.BLACK ? SET_TEXT_COLOR_BLACK : SET_TEXT_COLOR_WHITE;
+        String pieceSymbol;
+
+        switch (pieceType) {
+            case KING -> pieceSymbol = teamColor == ChessGame.TeamColor.BLACK ? BLACK_KING : WHITE_QUEEN;
+            case QUEEN -> pieceSymbol = teamColor == ChessGame.TeamColor.BLACK ? BLACK_QUEEN : WHITE_QUEEN;
+            case BISHOP -> pieceSymbol = teamColor == ChessGame.TeamColor.BLACK ? BLACK_BISHOP : WHITE_BISHOP;
+            case KNIGHT -> pieceSymbol = teamColor == ChessGame.TeamColor.BLACK ? BLACK_KNIGHT : WHITE_KNIGHT;
+            case ROOK -> pieceSymbol = teamColor == ChessGame.TeamColor.BLACK ? BLACK_ROOK : WHITE_ROOK;
+            case PAWN -> pieceSymbol = teamColor == ChessGame.TeamColor.BLACK ? BLACK_PAWN : WHITE_PAWN;
+            default -> pieceSymbol = "";
+
         }
+
+        return textColor + pieceSymbol + RESET_TEXT_COLOR;
+
     }
 }
 
