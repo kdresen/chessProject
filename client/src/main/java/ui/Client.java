@@ -188,6 +188,7 @@ public class Client {
         } catch (ResponseException ex) {
             return "Please sign in";
         }
+        // final
 
         // add check to make sure games list isn't empty
         if (params.length >= 1) {
