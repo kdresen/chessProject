@@ -17,7 +17,7 @@ public class GameClient {
     private final int gameID;
     private final ServerFacade server;
     private ChessGame chessGame;
-    private static final boolean closed = false;
+    private static final boolean CLOSED = false;
 
 
     public GameClient(Client client, ServerFacade serverFacade, int gameID, ChessGame.TeamColor teamColor, String authToken) throws Exception {
@@ -44,7 +44,7 @@ public class GameClient {
         System.out.println("Welcome to the chess game, type 'help' for a list of commands.");
 
         while (true) {
-            if (closed) {
+            if (CLOSED) {
                 return;
             }
             System.out.print(EscapeSequences.RESET_TEXT_COLOR);
