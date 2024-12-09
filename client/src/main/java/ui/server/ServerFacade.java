@@ -65,7 +65,11 @@ public class ServerFacade {
 
     public String joinGame(int gameID, ChessGame.TeamColor playerColor, String authToken) throws ResponseException {
         var path = "/game";
+        return this.makeRequest("PUT", path, new JoinGameRequest(playerColor, gameID), null, authToken);
+    }
 
+    public String leaveGame(int gameID, ChessGame.TeamColor playerColor, String authToken) throws ResponseException {
+        var path = "/leave";
         return this.makeRequest("PUT", path, new JoinGameRequest(playerColor, gameID), null, authToken);
     }
 

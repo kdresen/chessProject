@@ -122,6 +122,22 @@ public class MySQLGameDAO implements GameDAO {
     }
 
     @Override
+    public void removeUser(int gameID, ChessGame.TeamColor playerColor) throws DataAccessException {
+        String column = (playerColor == ChessGame.TeamColor.BLACK) ? "blackUsername" : "whiteUsername";
+        String sql = "UPDATE games SET " + column + " = ? WHERE gameID = ?";
+
+        try (var conn = DatabaseManager.getConnection();
+             var ps = conn.prepareStatement(sql)) {
+            ps.setString(1, null);
+            ps.setInt(2, gameID);
+
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public void updateGame(ChessGame game, Integer gameID) throws DataAccessException {
         String sql = "UPDATE games SET game = ? WHERE gameID = ?";
         try (Connection conn = DatabaseManager.getConnection();

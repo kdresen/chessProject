@@ -3,10 +3,6 @@ package service;
 import dataaccess.daointerfaces.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.daointerfaces.GameDAO;
-import dataaccess.memorydao.MemoryAuthDAO;
-import dataaccess.memorydao.MemoryGameDAO;
-import dataaccess.sqldao.MySQLAuthDAO;
-import dataaccess.sqldao.MySQLGameDAO;
 import model.AuthData;
 import model.GameData;
 import request.CreateGamesRequest;
@@ -79,9 +75,5 @@ public class GameService {
         }
         List<GameData> result = gameDAO.getAllGames();
         return new ListGamesResult(result);
-    }
-
-    public GameData getGameByID(int gameID) throws DataAccessException {
-        return gameDAO.getGameByID(gameID);
     }
 }

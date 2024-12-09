@@ -17,16 +17,15 @@ public class WebsocketCommunicator {
 
     Session session;
     private final Gson gson = new Gson();
-    private ChessGame game;
     public ChessGame.TeamColor teamColor = ChessGame.TeamColor.WHITE;
     private final GameClient gameClient;
 
-    public WebsocketCommunicator(String url, GameClient gameClient) throws Exception {
+    public WebsocketCommunicator(String url, GameClient gameClient) {
         this.gameClient = gameClient;
         connect(url);
     }
 
-    private void connect(String url) throws Exception {
+    private void connect(String url) {
         try {
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             container.connectToServer(this, new URI(url));

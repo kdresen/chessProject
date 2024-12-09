@@ -20,8 +20,8 @@ import java.util.*;
 
 @WebSocket
 public class WebSocketHandler {
-    private GameDAO gameDAO;
-    private AuthDAO authDAO;
+    private final GameDAO gameDAO;
+    private final AuthDAO authDAO;
     private static final Map<Integer, List<Session>> CONNECTIONS = new HashMap<>();
 
     public WebSocketHandler(AuthDAO authDAO, GameDAO gameDAO) {
@@ -81,16 +81,17 @@ public class WebSocketHandler {
     private void handleConnect(Session session, UserGameCommand command) throws DataAccessException {
         Integer gameID = command.getGameID();
         String authToken = command.getAuthToken();
-        String username = authDAO.getAuthData(authToken).username();
-        GameData gameData = gameDAO.getGameByID(gameID);
 
-        if (Objects.equals(authToken, null)) {
+        AuthData testAuth = authDAO.getAuthData(authToken);
+        if (Objects.equals(testAuth, null)) {
             System.out.println("User not found.");
             ErrorMessage error = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "invalid authToken");
             String json = new Gson().toJson(error);
             sendMessage(json, session);
             return;
         }
+        String username = authDAO.getAuthData(authToken).username();
+        GameData gameData = gameDAO.getGameByID(gameID);
         if (gameData == null) {
             System.out.println("Game not found.");
             ErrorMessage error = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "game not found");
@@ -124,10 +125,11 @@ public class WebSocketHandler {
             throws DataAccessException {
         Integer gameID = command.getGameID();
         String authToken = command.getAuthToken();
+        AuthData testAuth = authDAO.getAuthData(authToken);
         GameData gameData = gameDAO.getGameByID(gameID);
         ChessMove move = command.getMove();
 
-        if (Objects.equals(authToken, null)) {
+        if (Objects.equals(testAuth, null)) {
             ErrorMessage error = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "invalid authToken");
             String json = new Gson().toJson(error);
             sendMessage(json, session);
@@ -222,12 +224,19 @@ public class WebSocketHandler {
             return;
         }
         String color = "observer";
+        ChessGame.TeamColor tColor = null;
         if (Objects.equals(gameData.whiteUsername(), username)) {
             color = "white";
+            tColor = ChessGame.TeamColor.WHITE;
         }
         else if (Objects.equals(gameData.blackUsername(), username)) {
             color = "black";
+            tColor = ChessGame.TeamColor.BLACK;
         }
+        if (tColor != null) {
+            gameDAO.removeUser(gameID, tColor);
+        }
+
 
         NotificationMessage notif = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
                 color + " user " + username + " left the game");

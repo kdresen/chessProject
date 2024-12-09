@@ -1,8 +1,6 @@
 package ui;
 
 import ui.websocket.ServerMessageHandler;
-import websocket.messages.NotificationMessage;
-import ui.EscapeSequences.*;
 
 import java.util.Scanner;
 
@@ -23,7 +21,7 @@ public class Repl implements ServerMessageHandler {
 
 
     public Repl (String serverUrl) {
-        client = new Client(serverUrl, this);
+        client = new Client(serverUrl);
     }
 
     public void run() {
@@ -45,11 +43,6 @@ public class Repl implements ServerMessageHandler {
             }
         }
         System.out.println();
-    }
-
-    public void notify(NotificationMessage msg) {
-        System.out.println(SET_TEXT_COLOR_RED + msg.getMessage());
-        printPrompt();
     }
 
     private void printPrompt() {

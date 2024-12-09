@@ -11,20 +11,12 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class MemoryGameDAO implements GameDAO {
-    private List<GameData> games;
+    private final List<GameData> games;
     private int totalGames;
-    private static MemoryGameDAO instance;
 
     private MemoryGameDAO() {
-        this.games = new ArrayList<GameData>();
+        this.games = new ArrayList<>();
         this.totalGames = 0;
-    }
-
-    public static MemoryGameDAO getInstance() {
-        if (instance == null) {
-            instance = new MemoryGameDAO();
-        }
-        return instance;
     }
 
     @Override
@@ -36,7 +28,7 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public GameData getGameByID(int gameID) throws DataAccessException {
+    public GameData getGameByID(int gameID) {
         // cool optional object I just learned about
         Optional<GameData> game = games.stream().filter(g -> Objects.equals(g.gameID(), gameID)).findFirst();
         // return null if game is not found
@@ -44,7 +36,7 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public List<GameData> getAllGames() throws DataAccessException {
+    public List<GameData> getAllGames() {
         return new ArrayList<>(games);
     }
 
@@ -71,7 +63,22 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void updateGame(ChessGame game, Integer gameID) throws DataAccessException {
+    public void removeUser(int gameID, ChessGame.TeamColor playerColor) {
+        for (int i = 0; i < games.size(); i++) {
+            GameData gameData = games.get(i);
+            if (gameData.gameID() == gameID) {
+                if (playerColor == ChessGame.TeamColor.BLACK) {
+                    games.set(i, gameData.replaceBlackUsername(null));
+                } else {
+                    games.set(i, gameData.replaceWhiteUsername(null));
+                }
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void updateGame(ChessGame game, Integer gameID) {
         for (int i = 0; i < games.size(); i++) {
             GameData gameData = games.get(i);
             if (gameData.gameID() == gameID) {
@@ -81,12 +88,12 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void deleteGame(int gameID) throws DataAccessException {
+    public void deleteGame(int gameID) {
         games.removeIf(gameData -> gameData.gameID() == gameID);
     }
 
     @Override
-    public void deleteAllGames() throws DataAccessException {
+    public void deleteAllGames() {
         games.clear();
     }
 }

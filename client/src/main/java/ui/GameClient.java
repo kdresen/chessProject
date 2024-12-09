@@ -1,6 +1,7 @@
 package ui;
 
 import chess.*;
+import ui.server.ServerFacade;
 import ui.websocket.WebsocketCommunicator;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
@@ -11,18 +12,20 @@ import java.util.Scanner;
 public class GameClient {
     private final Scanner scanner;
     private final ChessGame.TeamColor color;
-    private WebsocketCommunicator websocketCommunicator;
+    private final WebsocketCommunicator websocketCommunicator;
     private final String authToken;
     private final int gameID;
+    private final ServerFacade server;
     private ChessGame chessGame;
-    private static boolean closed = false;
+    private static final boolean closed = false;
 
 
-    public GameClient(Client client, int gameID, ChessGame.TeamColor teamColor, String authToken) throws Exception {
+    public GameClient(Client client, ServerFacade serverFacade, int gameID, ChessGame.TeamColor teamColor, String authToken) throws Exception {
         scanner = new Scanner(System.in);
         color = teamColor;
         this.authToken = authToken;
         this.gameID = gameID;
+        this.server = serverFacade;
         try {
             this.websocketCommunicator = client.getServer().createWebSocketClient(this);
         } catch (Exception e) {
@@ -49,9 +52,6 @@ public class GameClient {
             String command = scanner.nextLine().trim().toLowerCase();
 
             switch (command) {
-                case "help":
-                    help();
-                    break;
                 case "redraw":
                     ChessGame.TeamColor playerColor = (color == null) ? ChessGame.TeamColor.WHITE : color;
                     DrawChessBoard.drawBoard(chessGame.getBoard(), playerColor, null);
@@ -102,6 +102,12 @@ public class GameClient {
         if (response.equals("y") || response.equals("yes")){
             UserGameCommand leave = new UserGameCommand(UserGameCommand.CommandType.LEAVE,
                     authToken, gameID);
+            try {
+                server.leaveGame(gameID, color, authToken);
+            } catch (Exception e) {
+                return true;
+            }
+
             websocketCommunicator.sendMessage(leave);
             System.out.println("You left the game");
             return true;
@@ -139,7 +145,6 @@ public class GameClient {
         }
 
         ChessPiece.PieceType promotion = null;
-        assert piece != null;
         if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
             if (((color == ChessGame.TeamColor.BLACK) && (e.getRow() == 1)) ||
                     ((color == ChessGame.TeamColor.WHITE) && (e.getRow() == 8))) {

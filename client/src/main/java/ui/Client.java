@@ -2,11 +2,10 @@ package ui;
 
 import chess.ChessGame;
 import exception.ResponseException;
+import model.AuthData;
 import model.GameData;
 import model.UserData;
 import ui.server.ServerFacade;
-import ui.websocket.ServerMessageHandler;
-import ui.websocket.WebsocketCommunicator;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,10 +24,9 @@ public class Client {
     private List<String> mostRecentGamesList;
     ChessGame currentGame;
 
-    private WebsocketCommunicator ws;
 
 
-    public Client(String serverUrl, ServerMessageHandler serverMessageHandler) {
+    public Client(String serverUrl) {
         this.server = new ServerFacade(serverUrl);
 
         this.authToken = null;
@@ -212,7 +210,6 @@ public class Client {
             GameData game = getGameFromNumber(gameNumber);
             assert game != null;
             int gameID = game.gameID();
-            String gameName = getGameNameFromIndex(gameNumber);
 
             // get the player color
             String chosenColor = params[1];
@@ -227,7 +224,7 @@ public class Client {
                 server.joinGame(gameID, color, authToken);
 
                 System.out.println("Joined game successfully.");
-                new GameClient(this, gameID, color, authToken).start();
+                new GameClient(this, server, gameID, color, authToken).start();
                 return "Exited game";
 
             } catch (ResponseException ex) {
@@ -263,7 +260,7 @@ public class Client {
 
         try {
             assert game != null;
-            new GameClient(this, game.gameID(), null, authToken).start();
+            new GameClient(this, server, game.gameID(), null, authToken).start();
             return "Exited game";
         } catch (Exception e) {
             return "Failed to observe game: " + e.getMessage();
@@ -334,12 +331,6 @@ public class Client {
     private void assertSignedIn() throws ResponseException {
         if (state == State.SIGNEDOUT) {
             throw new ResponseException(400, "You must sign in");
-        }
-    }
-
-    private void assertInGame() throws ResponseException {
-        if (state == State.INGAME) {
-            throw new ResponseException(400, "Please Join A Game To Make this Command");
         }
     }
 

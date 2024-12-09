@@ -15,7 +15,7 @@ import model.UserData;
 import request.*;
 import result.*;
 import server.websocket.WebSocketHandler;
-import org.eclipse.jetty.websocket.api.Session;
+
 import service.AdminService;
 import service.GameService;
 import service.UserService;
@@ -23,16 +23,12 @@ import spark.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Server {
     public UserService userService;
     public GameService gameService;
     public AdminService adminService;
     private final Gson gson = new Gson();
-    static final boolean SQL = true;
-
-    public static ConcurrentHashMap<Session, Integer> gameSessions = new ConcurrentHashMap<>();
 
     public Server() {}
 
