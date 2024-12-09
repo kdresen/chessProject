@@ -2,7 +2,6 @@ package ui;
 
 import chess.ChessGame;
 import exception.ResponseException;
-import model.AuthData;
 import model.GameData;
 import model.UserData;
 import ui.server.ServerFacade;
