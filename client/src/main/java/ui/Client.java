@@ -188,8 +188,6 @@ public class Client {
         } catch (ResponseException ex) {
             return "Please sign in";
         }
-        // TODO
-        // issue here with joining with bad authToken
 
         // add check to make sure games list isn't empty
         if (params.length >= 1) {

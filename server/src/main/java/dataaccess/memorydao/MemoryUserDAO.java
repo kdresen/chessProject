@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class MemoryUserDAO implements UserDAO {
-    private static MemoryUserDAO instance;
+
     private final List<UserData> users;
 
 
@@ -19,12 +19,6 @@ public class MemoryUserDAO implements UserDAO {
         this.users = new ArrayList<UserData>();
     }
 
-    public static MemoryUserDAO getInstance() {
-        if (instance == null) {
-            instance = new MemoryUserDAO();
-        }
-        return instance;
-    }
 
     @Override
     public String createUser(UserData user) throws DataAccessException {

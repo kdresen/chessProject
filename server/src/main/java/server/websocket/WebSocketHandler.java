@@ -135,8 +135,10 @@ public class WebSocketHandler {
             sendMessage(json, session);
             return;
         }
-        if (!(authDAO.getAuthData(authToken).username().equals(gameData.blackUsername()) && gameData.game().getTeamTurn() == ChessGame.TeamColor.BLACK)
-                && !(authDAO.getAuthData(authToken).username().equals(gameData.whiteUsername()) && gameData.game().getTeamTurn() == ChessGame.TeamColor.WHITE)) {
+        if (!(authDAO.getAuthData(authToken).username().equals(gameData.blackUsername())
+                && gameData.game().getTeamTurn() == ChessGame.TeamColor.BLACK)
+                && !(authDAO.getAuthData(authToken).username().equals(gameData.whiteUsername())
+                && gameData.game().getTeamTurn() == ChessGame.TeamColor.WHITE)) {
             ErrorMessage error = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, "wrong turn");
             String json = new Gson().toJson(error);
             sendMessage(json, session);
