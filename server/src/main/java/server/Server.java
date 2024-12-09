@@ -160,6 +160,4 @@ public class Server {
             return exceptionHandler(ex, req, res);
         }
     }
-
-
 }

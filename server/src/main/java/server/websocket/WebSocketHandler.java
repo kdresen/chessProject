@@ -254,6 +254,7 @@ public class WebSocketHandler {
             }
             gameDAO.updateGame(gameData.game(), gameID);
         }
+        //session.close();
         CONNECTIONS.get(gameID).remove(session);
         System.out.print("[IN_GAME] >>> ");
     }

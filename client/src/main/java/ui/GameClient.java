@@ -102,11 +102,6 @@ public class GameClient {
         if (response.equals("y") || response.equals("yes")){
             UserGameCommand leave = new UserGameCommand(UserGameCommand.CommandType.LEAVE,
                     authToken, gameID);
-            try {
-                server.leaveGame(gameID, color, authToken);
-            } catch (Exception e) {
-                return true;
-            }
 
             websocketCommunicator.sendMessage(leave);
             System.out.println("You left the game");

@@ -35,7 +35,7 @@ public class DrawChessBoard {
         }
         System.out.println(EMPTY + RESET_BG_COLOR);
         for (int i = startRow; i - rowStep != endRow; i += rowStep) {
-            System.out.print(SET_BG_COLOR_DARK_GREY + "\u2003" + (i + 1) + " ");
+            System.out.print(SET_BG_COLOR_DARK_GREY + "\u2003" + (i + 1) + "  ");
             if (i % 2 == 0) {
                 for (int j = startCol; j - colStep != endCol; j += colStep) {
                     String backgroundColor = (j % 2 == 0) ? SET_BG_COLOR_BLACK : SET_BG_COLOR_WHITE;
@@ -86,7 +86,7 @@ public class DrawChessBoard {
     }
 
     private static String getFormattedPieceText(ChessGame.TeamColor teamColor, ChessPiece.PieceType pieceType) {
-        String textColor = teamColor == ChessGame.TeamColor.BLACK ? SET_TEXT_COLOR_BLACK : SET_TEXT_COLOR_WHITE;
+        String textColor = teamColor == ChessGame.TeamColor.BLACK ? SET_TEXT_COLOR_BLUE : SET_TEXT_COLOR_RED;
         String pieceSymbol;
 
         switch (pieceType) {
