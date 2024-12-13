@@ -14,7 +14,7 @@ public class MemoryGameDAO implements GameDAO {
     private final List<GameData> games;
     private int totalGames;
 
-    private MemoryGameDAO() {
+    public MemoryGameDAO() {
         this.games = new ArrayList<>();
         this.totalGames = 0;
     }

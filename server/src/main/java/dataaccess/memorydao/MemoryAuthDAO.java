@@ -9,7 +9,7 @@ import java.util.*;
 public class MemoryAuthDAO implements AuthDAO {
     private List<AuthData> auths;
 
-    private MemoryAuthDAO() {
+    public MemoryAuthDAO() {
         this.auths = new ArrayList<AuthData>();
     }
 

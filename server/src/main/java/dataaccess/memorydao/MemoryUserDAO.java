@@ -15,7 +15,7 @@ public class MemoryUserDAO implements UserDAO {
 
 
 
-    private MemoryUserDAO() {
+    public MemoryUserDAO() {
         this.users = new ArrayList<UserData>();
     }
 
